@@ -1,5 +1,5 @@
 // Service Worker for Mutanda Traders Admin
-const CACHE_NAME = 'mutanda-traders-admin-v2.1.0';
+const CACHE_NAME = 'mutanda-traders-admin-v2.1.1';
 const urlsToCache = [
   './',
   './index.html',

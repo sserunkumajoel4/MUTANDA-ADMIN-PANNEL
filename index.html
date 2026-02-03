@@ -1908,12 +1908,12 @@ function hideInstallPrompt() {
   }
 }
 
-function dismissInstallPrompt() {
+window.dismissInstallPrompt = function() {
   localStorage.setItem("installPromptDismissed", "true");
   hideInstallPrompt();
-}
+};
 
-async function installPWA() {
+window.installPWA = async function() {
   if (!deferredPrompt) return;
 
   deferredPrompt.prompt();
@@ -1927,7 +1927,7 @@ async function installPWA() {
 
   deferredPrompt = null;
   hideInstallPrompt();
-}
+};
 
 
         // Launch screen timeout
