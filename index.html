@@ -3,17 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MOVIA BOTIQUE - Admin Portal</title>
+    <meta name="theme-color" content="#1a5f23">
+    <meta name="description" content="Mutanda Traders Admin - Manage your online store, stock, and orders">
+    <title>Mutanda Traders - Admin Portal</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/currency.js"></script>
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%);
+            --primary-gradient: linear-gradient(135deg, #1a5f23 0%, #2E8B57 100%);
             --danger-gradient: linear-gradient(135deg, #ff6b6b, #ee5a52);
             --warning-gradient: linear-gradient(135deg, #ffd93d, #ff9f43);
             --success-gradient: linear-gradient(135deg, #48bb78, #38a169);
-            --primary-color: #2E8B57;
-            --secondary-color: #3CB371;
+            --info-gradient: linear-gradient(135deg, #4299e1, #3182ce);
+            --primary-color: #1a5f23;
+            --secondary-color: #2E8B57;
             --text-dark: #2d3748;
             --text-medium: #4a5568;
             --text-light: #718096;
@@ -27,7 +33,7 @@
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-xl: 20px;
-            --transition: all 0.3s ease;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -37,11 +43,13 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
             color: var(--text-medium);
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
@@ -50,13 +58,80 @@
             padding: 20px;
         }
 
-        /* Login Page Styles */
+        /* Launch Screen */
+        #launchScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeOut 0.5s ease 2s forwards;
+        }
+
+        .launch-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-xl);
+            animation: pulse 2s infinite;
+        }
+
+        .launch-logo i {
+            font-size: 60px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .launch-text {
+            text-align: center;
+            color: white;
+        }
+
+        .launch-text h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .launch-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        /* Login Page */
         .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .login-card {
@@ -90,6 +165,7 @@
         .login-header p {
             color: var(--text-light);
             font-size: 1rem;
+            line-height: 1.5;
         }
 
         .login-form {
@@ -125,7 +201,7 @@
         .form-group input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+            box-shadow: 0 0 0 3px rgba(26, 95, 35, 0.1);
         }
 
         .btn {
@@ -149,46 +225,14 @@
             color: white;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(46, 139, 87, 0.3);
-            opacity: 0.9;
+            box-shadow: 0 10px 25px rgba(26, 95, 35, 0.3);
         }
 
-        .btn-secondary {
-            background: var(--text-light);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .login-footer {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .divider span {
-            padding: 0 15px;
-            color: var(--text-light);
-            font-size: 14px;
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .error {
@@ -200,6 +244,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            animation: slideIn 0.3s ease;
         }
 
         .success {
@@ -211,9 +256,15 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            animation: slideIn 0.3s ease;
         }
 
-        /* Admin Panel Styles (only shown after login) */
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Admin Panel */
         .admin-panel {
             display: none;
         }
@@ -229,7 +280,6 @@
             z-index: 1000;
             box-shadow: var(--shadow-md);
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            width: 100%;
         }
 
         .mobile-header-content {
@@ -349,7 +399,7 @@
         }
 
         .mobile-nav-tab:hover {
-            background: rgba(46, 139, 87, 0.05);
+            background: rgba(26, 95, 35, 0.05);
             color: var(--primary-color);
         }
 
@@ -401,7 +451,7 @@
             opacity: 0.9;
         }
 
-        /* Overlay for mobile sidebar */
+        /* Overlay */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -488,7 +538,7 @@
             transform: translateY(-2px);
         }
 
-        /* Desktop Navigation */
+        /* Navigation */
         .nav-tabs {
             display: none;
             gap: 10px;
@@ -526,9 +576,10 @@
         .nav-tab.active {
             background: var(--primary-gradient);
             color: white;
-            box-shadow: 0 4px 15px rgba(46, 139, 87, 0.4);
+            box-shadow: 0 4px 15px rgba(26, 95, 35, 0.4);
         }
 
+        /* Tab Content */
         .tab-content {
             display: none;
             background: rgba(255, 255, 255, 0.98);
@@ -542,10 +593,10 @@
 
         .tab-content.active {
             display: block;
-            animation: fadeIn 0.5s ease;
+            animation: fadeInUp 0.5s ease;
         }
 
-        @keyframes fadeIn {
+        @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
@@ -557,6 +608,8 @@
             margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .tab-header h2 {
@@ -567,10 +620,10 @@
             gap: 10px;
         }
 
+        /* Search Box */
         .search-box {
             position: relative;
             width: 100%;
-            margin-top: 15px;
         }
 
         .search-box input {
@@ -586,7 +639,7 @@
         .search-box input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+            box-shadow: 0 0 0 3px rgba(26, 95, 35, 0.1);
         }
 
         .search-box i {
@@ -597,6 +650,7 @@
             color: var(--text-light);
         }
 
+        /* Forms */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -618,17 +672,13 @@
         .form-group textarea:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+            box-shadow: 0 0 0 3px rgba(26, 95, 35, 0.1);
         }
 
+        /* Buttons */
         .btn-danger {
             background: var(--danger-gradient);
             color: white;
-        }
-
-        .btn-danger:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
         }
 
         .btn-warning {
@@ -636,19 +686,14 @@
             color: white;
         }
 
-        .btn-warning:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
         .btn-success {
             background: var(--success-gradient);
             color: white;
         }
 
-        .btn-success:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
+        .btn-info {
+            background: var(--info-gradient);
+            color: white;
         }
 
         .btn-sm {
@@ -656,6 +701,118 @@
             font-size: 14px;
         }
 
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 20px;
+            color: white;
+        }
+
+        .stat-icon.primary { background: var(--primary-gradient); }
+        .stat-icon.success { background: var(--success-gradient); }
+        .stat-icon.warning { background: var(--warning-gradient); }
+        .stat-icon.danger { background: var(--danger-gradient); }
+        .stat-icon.info { background: var(--info-gradient); }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Image Upload */
+        .image-upload {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            background: #f8fafc;
+            transition: var(--transition);
+        }
+
+        .image-preview:hover {
+            border-color: var(--primary-color);
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .upload-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .upload-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Products Grid */
         .products-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -688,6 +845,7 @@
             border-radius: var(--radius-sm);
             font-size: 12px;
             font-weight: 600;
+            z-index: 1;
         }
 
         .product-image {
@@ -697,6 +855,7 @@
             border-radius: var(--radius-md);
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
+            background: #f8fafc;
         }
 
         .product-title {
@@ -746,53 +905,122 @@
             margin-top: 15px;
         }
 
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Orders Cards */
+        .orders-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
             margin-top: 20px;
-            background: white;
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
         }
 
-        .orders-table th,
-        .orders-table td {
-            padding: 15px;
-            text-align: left;
+        .order-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .orders-table th {
-            background: var(--primary-gradient);
-            color: white;
+        .order-id {
             font-weight: 600;
-            text-transform: uppercase;
+            color: var(--text-dark);
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .order-date {
+            color: var(--text-light);
             font-size: 14px;
-            letter-spacing: 0.5px;
         }
 
-        .orders-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .orders-table tr:hover {
-            background: rgba(46, 139, 87, 0.05);
-        }
-
-        .customer-info {
-            display: flex;
-            flex-direction: column;
+        .order-customer {
+            margin-bottom: 15px;
         }
 
         .customer-name {
             font-weight: 600;
             color: var(--text-dark);
+            margin-bottom: 5px;
         }
 
         .customer-contact {
-            font-size: 13px;
             color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .order-products {
+            margin-bottom: 15px;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-image-small {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .product-info {
+            display: flex;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .product-quantity {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .order-total {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.2rem;
         }
 
         .status-badge {
@@ -811,6 +1039,12 @@
         .status-delivered { background: #d1e7dd; color: #0a3622; }
         .status-cancelled { background: #f8d7da; color: #721c24; }
 
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Loading States */
         .loading {
             text-align: center;
             padding: 40px;
@@ -825,7 +1059,7 @@
         .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(46, 139, 87, 0.2);
+            border: 4px solid rgba(26, 95, 35, 0.2);
             border-top: 4px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -836,151 +1070,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            box-shadow: var(--shadow-md);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            font-size: 20px;
-            color: white;
-        }
-
-        .stat-icon.primary {
-            background: var(--primary-gradient);
-        }
-
-        .stat-icon.success {
-            background: var(--success-gradient);
-        }
-
-        .stat-icon.warning {
-            background: var(--warning-gradient);
-        }
-
-        .stat-icon.danger {
-            background: var(--danger-gradient);
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: var(--text-light);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .image-upload {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .image-preview {
-            width: 100%;
-            height: 200px;
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-            background: #f8fafc;
-            transition: var(--transition);
-        }
-
-        .image-preview:hover {
-            border-color: var(--primary-color);
-        }
-
-        .image-preview img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .upload-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            color: var(--text-light);
-        }
-
-        .upload-label i {
-            font-size: 40px;
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-
-        .upload-info {
-            margin-top: 10px;
-            font-size: 14px;
-            color: var(--text-light);
-        }
-
-        .upload-progress {
-            margin-top: 15px;
-            width: 100%;
-            display: none;
-        }
-
-        .progress-bar {
-            height: 10px;
-            background: var(--border-color);
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-gradient);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            margin-top: 5px;
-            font-size: 13px;
-            color: var(--text-light);
-            text-align: center;
-        }
-
+        /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
@@ -997,7 +1087,7 @@
             transition: var(--transition);
         }
 
-        .pagination button:hover {
+        .pagination button:hover:not(:disabled) {
             background: var(--bg-light);
         }
 
@@ -1007,6 +1097,7 @@
             border-color: var(--primary-color);
         }
 
+        /* Dropdowns */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -1037,6 +1128,7 @@
             pointer-events: none;
         }
 
+        /* Empty States */
         .empty-state {
             text-align: center;
             padding: 50px 20px;
@@ -1054,58 +1146,7 @@
             margin-bottom: 10px;
         }
 
-        /* Mobile Responsive Styles */
-        @media (min-width: 768px) {
-            .mobile-header {
-                display: none;
-            }
-            
-            .header {
-                display: block;
-            }
-            
-            .nav-tabs {
-                display: flex;
-            }
-            
-            .container {
-                padding: 20px;
-            }
-            
-            .tab-content {
-                padding: 30px;
-                margin-top: 0;
-            }
-            
-            .form-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .search-box {
-                width: 300px;
-                margin-top: 0;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .form-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        /* Toast notifications */
+        /* Toast Notifications */
         .toast {
             position: fixed;
             top: 20px;
@@ -1118,11 +1159,16 @@
             gap: 10px;
             z-index: 1000;
             box-shadow: var(--shadow-lg);
-            animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+            animation: slideInRight 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
         }
 
-        .toast i {
-            font-size: 20px;
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
         }
 
         .toast-success {
@@ -1135,17 +1181,7 @@
             color: white;
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        /* Modal */
+        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -1207,20 +1243,110 @@
             gap: 10px;
         }
 
+        /* Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 15px;
+            box-shadow: var(--shadow-xl);
+            z-index: 999;
+            display: none;
+            animation: slideInUp 0.3s ease;
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Mobile Responsive */
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .orders-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (min-width: 768px) {
-            .modal-content {
+            .mobile-header {
+                display: none;
+            }
+            
+            .header {
+                display: block;
+            }
+            
+            .nav-tabs {
+                display: flex;
+            }
+            
+            .tab-content {
                 padding: 30px;
+                margin-top: 0;
+            }
+            
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .search-box {
+                width: 300px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .form-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .orders-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .orders-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
         }
     </style>
 </head>
 <body>
+    <!-- Launch Screen -->
+    <div id="launchScreen">
+        <div class="launch-logo">
+            <i class="fas fa-store"></i>
+        </div>
+        <div class="launch-text">
+            <h1>Mutanda Traders</h1>
+            <p>Manage your stock and receive orders</p>
+        </div>
+    </div>
+
     <!-- Login Page -->
     <div id="loginPage" class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h1><i class="fas fa-tshirt"></i> MOVIA BOTIQUE Admin</h1>
-                <p>Please sign in to access the admin panel</p>
+                <h1><i class="fas fa-store"></i> Mutanda Traders</h1>
+                <p>Admin Portal - Manage your online store</p>
             </div>
             
             <div id="loginError" class="error" style="display: none;">
@@ -1260,8 +1386,8 @@
     <div id="registerPage" class="login-container" style="display: none;">
         <div class="login-card">
             <div class="login-header">
-                <h1><i class="fas fa-tshirt"></i> MOVIA BOTIQUE Admin</h1>
-                <p>Create a new admin account</p>
+                <h1><i class="fas fa-store"></i> Mutanda Traders</h1>
+                <p>Create admin account</p>
             </div>
             
             <div id="registerError" class="error" style="display: none;">
@@ -1307,14 +1433,14 @@
         </div>
     </div>
 
-    <!-- Admin Panel (only shown after login) -->
+    <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel">
         <!-- Mobile Header -->
         <div class="mobile-header">
             <div class="mobile-header-content">
                 <div class="mobile-logo">
-                    <i class="fas fa-tshirt"></i>
-                    <span>MOVIA BOTIQUE</span>
+                    <i class="fas fa-store"></i>
+                    <span>Mutanda Traders</span>
                 </div>
                 <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">
                     <i class="fas fa-bars"></i>
@@ -1326,8 +1452,8 @@
         <div class="mobile-sidebar" id="mobileSidebar">
             <div class="mobile-sidebar-header">
                 <div class="mobile-sidebar-logo">
-                    <i class="fas fa-tshirt"></i>
-                    <span>MOVIA BOTIQUE</span>
+                    <i class="fas fa-store"></i>
+                    <span>Mutanda Traders</span>
                 </div>
                 <button class="mobile-sidebar-close" onclick="toggleMobileSidebar()">
                     <i class="fas fa-times"></i>
@@ -1364,8 +1490,8 @@
         <div class="container">
             <!-- Desktop Header -->
             <div class="header">
-                <h1><i class="fas fa-tshirt"></i> MOVIA BOTIQUE Admin Portal</h1>
-                <p>Manage your fashion products, orders, and inventory with ease</p>
+                <h1><i class="fas fa-store"></i> Mutanda Traders Admin Portal</h1>
+                <p>Manage your online store, stock, and orders</p>
                 <div class="user-info">
                     <div class="user-avatar" id="userAvatar">A</div>
                     <span id="userName">Admin User</span>
@@ -1478,32 +1604,45 @@
                             <label for="category"><i class="fas fa-list"></i> Category</label>
                             <select id="category" required>
                                 <option value="">Select Category</option>
+                                <option value="Clothing">Clothing</option>
                                 <option value="Shoes">Shoes</option>
-                                <option value="Dresses">Dresses</option>
-                                <option value="T-shirts">T-shirts</option>
-                                <option value="Casual Wear">Casual Wear</option>
                                 <option value="Accessories">Accessories</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Home">Home</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-image"></i> Product Image (Optional)</label>
+                        <label><i class="fas fa-image"></i> Product Image</label>
                         <div class="image-upload">
                             <div class="image-preview" id="imagePreview">
                                 <label for="image" class="upload-label">
                                     <i class="fas fa-cloud-upload-alt"></i>
                                     <span>Click to upload product image</span>
-                                    <small class="upload-info">Supports JPG, PNG (Max 5MB)</small>
+                                    <small class="upload-info">Supports JPG, PNG</small>
                                 </label>
                                 <input type="file" id="image" accept="image/*" style="display: none;">
                             </div>
-                            <div class="upload-progress" id="uploadProgress">
+                            <div class="upload-options">
+                                <button type="button" class="upload-btn" onclick="openCamera()">
+                                    <i class="fas fa-camera"></i> Take Photo
+                                </button>
+                                <button type="button" class="upload-btn" onclick="document.getElementById('image').click()">
+                                    <i class="fas fa-folder-open"></i> Choose from Device
+                                </button>
+                            </div>
+                            <div class="upload-progress" id="uploadProgress" style="display: none;">
                                 <div class="progress-bar">
                                     <div class="progress-fill" id="progressBar"></div>
                                 </div>
                                 <div class="progress-text" id="progressText">Uploading...</div>
                             </div>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description"><i class="fas fa-align-left"></i> Description</label>
+                        <textarea id="description" rows="3" placeholder="Enter product description"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Add Product
@@ -1559,125 +1698,180 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Modal for Edit Product -->
-        <div class="modal" id="editProductModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3><i class="fas fa-edit"></i> Edit Product</h3>
-                    <button class="modal-close" onclick="closeModal('editProductModal')">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="editProductForm">
-                        <input type="hidden" id="editProductId">
-                        <div class="form-group">
-                            <label for="editName">Product Name</label>
-                            <input type="text" id="editName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editOriginalPrice">Original Price (UGX)</label>
-                            <input type="number" id="editOriginalPrice" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editDiscountedPrice">Discounted Price (UGX)</label>
-                            <input type="number" id="editDiscountedPrice" step="0.01" placeholder="0.00 (optional)">
-                        </div>
-                        <div class="form-group">
-                            <label for="editStock">Stock Quantity</label>
-                            <input type="number" id="editStock" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editColor">Color</label>
-                            <input type="text" id="editColor" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editSize">Size</label>
-                            <input type="text" id="editSize" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editCategory">Category</label>
-                            <select id="editCategory" required>
-                                <option value="Shoes">Shoes</option>
-                                <option value="Dresses">Dresses</option>
-                                <option value="T-shirts">T-shirts</option>
-                                <option value="Casual Wear">Casual Wear</option>
-                                <option value="Accessories">Accessories</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-danger" onclick="closeModal('editProductModal')">Cancel</button>
-                    <button class="btn btn-primary" onclick="saveProductChanges()">Save Changes</button>
-                </div>
+    <!-- Hidden camera input -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+
+    <!-- Install Prompt -->
+    <div id="installPrompt" class="install-prompt">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <i class="fas fa-store" style="font-size: 24px; color: var(--primary-color);"></i>
+            <div>
+                <h4 style="margin: 0; color: var(--text-dark);">Install Mutanda Traders</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--text-light);">Access faster from your home screen</p>
             </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="dismissInstallPrompt()" class="btn btn-secondary btn-sm" style="flex: 1;">Later</button>
+            <button onclick="installPWA()" class="btn btn-primary btn-sm" style="flex: 1;">Install</button>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- JavaScript -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged,
-            updateProfile
-        } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            addDoc, 
-            getDocs, 
-            doc, 
-            updateDoc, 
-            deleteDoc, 
-            query, 
-            where, 
-            orderBy, 
-            limit 
-        } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+// ---------------- Firebase Setup ----------------
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC4MHkpXUrnnQiaB4ru9q5CvJoQMwJRv1g",
-            authDomain: "aj-shop-e10b7.firebaseapp.com",
-            projectId: "aj-shop-e10b7",
-            storageBucket: "aj-shop-e10b7.firebasestorage.app",
-            messagingSenderId: "259849089139",
-            appId: "1:259849089139:web:7cee95b18d5e0c90103a06",
-            measurementId: "G-4YZQPLNR3F"
-        };
+// Firebase core
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+// Firebase Auth
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // Cloudinary Configuration
-        const CLOUDINARY_CLOUD_NAME = "dxgrgkz7c"; // Replace with your Cloudinary cloud name
-        const CLOUDINARY_UPLOAD_PRESET = "unsigned_uploads"; // Replace with your unsigned upload preset
+// Firestore
+import {
+  getFirestore,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Global variables
-        let products = [];
-        let orders = [];
-        let currentImageFile = null;
-        let currentPage = 1;
-        const itemsPerPage = 10;
+const firebaseConfig = {
+    apiKey: "AIzaSyC4MHkpXUrnnQiaB4ru9q5CvJoQMwJRv1g",
+    authDomain: "aj-shop-e10b7.firebaseapp.com",
+    projectId: "aj-shop-e10b7",
+    storageBucket: "aj-shop-e10b7.firebasestorage.app",
+    messagingSenderId: "259849089139",
+    appId: "1:259849089139:web:7cee95b18d5e0c90103a06",
+    measurementId: "G-4YZQPLNR3F"
+};
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            checkAuthState();
-        });
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-        // Check authentication state
+// ---------------- Cloudinary ----------------
+
+const CLOUDINARY_CLOUD_NAME = "dxgrgkz7c";
+const CLOUDINARY_UPLOAD_PRESET = "unsigned_uploads";
+
+// ---------------- Global State ----------------
+
+let products = [];
+let orders = [];
+let currentImageFile = null;
+let currentPage = 1;
+const itemsPerPage = 10;
+let deferredPrompt = null;
+
+// ---------------- App Init ----------------
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupEventListeners();
+  checkAuthState();
+  registerServiceWorker();
+  setupPWAInstall();
+});
+
+// ---------------- Service Worker ----------------
+
+async function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+
+  try {
+    const registration = await navigator.serviceWorker.register("./sw.js");
+    console.log("✅ Service Worker registered:", registration.scope);
+  } catch (err) {
+    console.error("❌ Service Worker registration failed:", err);
+  }
+}
+
+// ---------------- PWA Install ----------------
+
+function setupPWAInstall() {
+  const dismissed = localStorage.getItem("installPromptDismissed");
+  if (dismissed === "true") return;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    setTimeout(() => {
+      showInstallPrompt();
+    }, 4000);
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    hideInstallPrompt();
+    showToast("App installed successfully 🎉", "success");
+  });
+}
+
+function showInstallPrompt() {
+  const promptEl = document.getElementById("installPrompt");
+  if (promptEl) {
+    promptEl.style.display = "block";
+  }
+}
+
+function hideInstallPrompt() {
+  const promptEl = document.getElementById("installPrompt");
+  if (promptEl) {
+    promptEl.style.display = "none";
+  }
+}
+
+function dismissInstallPrompt() {
+  localStorage.setItem("installPromptDismissed", "true");
+  hideInstallPrompt();
+}
+
+async function installPWA() {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+
+  if (choice.outcome === "accepted") {
+    console.log("✅ User accepted PWA install");
+  } else {
+    console.log("❌ User dismissed PWA install");
+  }
+
+  deferredPrompt = null;
+  hideInstallPrompt();
+}
+
+
+        // Launch screen timeout
+        setTimeout(() => {
+            const launchScreen = document.getElementById('launchScreen');
+            launchScreen.style.animation = 'fadeOut 0.5s ease forwards';
+            setTimeout(() => {
+                launchScreen.style.display = 'none';
+            }, 500);
+        }, 2000);
+
         function checkAuthState() {
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // User is signed in
                     showAdminPanel(user);
                 } else {
-                    // User is signed out
                     showLoginPage();
                 }
             });
@@ -1728,20 +1922,17 @@
             // Show login page
             document.getElementById('showLoginBtn').addEventListener('click', showLoginPage);
             
-            // Image upload preview
+            // Image upload
             document.getElementById('image').addEventListener('change', handleImageUpload);
             
-            // Product form submission
+            // Camera input
+            document.getElementById('cameraInput').addEventListener('change', handleCameraImage);
+            
+            // Product form
             document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
             
             // Product search
             document.getElementById('productSearch').addEventListener('input', searchProducts);
-            
-            // Edit product form submission
-            document.getElementById('editProductForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveProductChanges();
-            });
         }
 
         // Toggle mobile sidebar
@@ -1752,8 +1943,58 @@
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
             
-            // Prevent body scroll when sidebar is open
             document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        };
+
+        // Open camera
+        window.openCamera = function() {
+            document.getElementById('cameraInput').click();
+        };
+
+        // Handle camera image
+        function handleCameraImage(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleImageFile(file);
+            }
+        }
+
+        // Handle image upload
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleImageFile(file);
+            }
+        }
+
+        // Handle image file
+        function handleImageFile(file) {
+            currentImageFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: contain;">
+                    <button class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;" onclick="removeImage()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove image
+        window.removeImage = function() {
+            document.getElementById('image').value = '';
+            document.getElementById('cameraInput').value = '';
+            document.getElementById('imagePreview').innerHTML = `
+                <label for="image" class="upload-label">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Click to upload product image</span>
+                    <small class="upload-info">Supports JPG, PNG</small>
+                </label>
+            `;
+            currentImageFile = null;
         };
 
         // Handle login
@@ -1767,7 +2008,6 @@
             
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                // Success - auth state change will handle the UI update
             } catch (error) {
                 errorMessage.textContent = error.message;
                 errorDiv.style.display = 'flex';
@@ -1785,14 +2025,12 @@
             const errorDiv = document.getElementById('registerError');
             const errorMessage = document.getElementById('registerErrorMessage');
             
-            // Validate passwords match
             if (password !== confirmPassword) {
                 errorMessage.textContent = 'Passwords do not match';
                 errorDiv.style.display = 'flex';
                 return;
             }
             
-            // Validate password length
             if (password.length < 6) {
                 errorMessage.textContent = 'Password must be at least 6 characters';
                 errorDiv.style.display = 'flex';
@@ -1801,23 +2039,19 @@
             
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                // Update user profile with name
                 await updateProfile(userCredential.user, {
                     displayName: name
                 });
-                
-                // Success - auth state change will handle the UI update
             } catch (error) {
                 errorMessage.textContent = error.message;
                 errorDiv.style.display = 'flex';
             }
         }
 
-        // Logout function
+        // Logout
         window.logout = async function() {
             try {
                 await signOut(auth);
-                // Auth state change will handle the UI update
             } catch (error) {
                 showToast('Error signing out: ' + error.message, 'error');
             }
@@ -1825,7 +2059,6 @@
 
         // Tab switching
         window.showTab = function(tabName) {
-            // Close mobile sidebar if open
             if (window.innerWidth <= 1024) {
                 toggleMobileSidebar();
             }
@@ -1836,12 +2069,10 @@
             
             document.getElementById(tabName).classList.add('active');
             
-            // Update active state for both desktop and mobile navigation
             if (event) {
                 event.target.classList.add('active');
             }
             
-            // Load data when tab is shown
             switch(tabName) {
                 case 'dashboard':
                     loadDashboardStats();
@@ -1856,64 +2087,14 @@
             }
         };
 
-        // Image upload handler
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
-            const preview = document.getElementById('imagePreview');
-            
-            if (file) {
-                // Check file size (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    showToast('Image size should be less than 5MB', 'error');
-                    e.target.value = '';
-                    return;
-                }
-                
-                currentImageFile = file;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: contain;">
-                        <button class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;" onclick="removeImage()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                currentImageFile = null;
-                preview.innerHTML = `
-                    <label for="image" class="upload-label">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span>Click to upload product image</span>
-                        <small class="upload-info">Supports JPG, PNG (Max 5MB)</small>
-                    </label>
-                `;
-            }
-        }
-
-        // Remove image
-        window.removeImage = function() {
-            document.getElementById('image').value = '';
-            document.getElementById('imagePreview').innerHTML = `
-                <label for="image" class="upload-label">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <span>Click to upload product image</span>
-                    <small class="upload-info">Supports JPG, PNG (Max 5MB)</small>
-                </label>
-            `;
-            currentImageFile = null;
-        };
-
-        // Upload image to Cloudinary
+        // Upload to Cloudinary
         async function uploadToCloudinary(file) {
             return new Promise((resolve, reject) => {
                 const formData = new FormData();
                 formData.append("file", file);
                 formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-                formData.append("folder", "products");
+                formData.append("folder", "mutanda_traders");
 
-                // Show progress
                 document.getElementById('uploadProgress').style.display = 'block';
 
                 const xhr = new XMLHttpRequest();
@@ -1957,7 +2138,7 @@
             }).format(amount);
         }
 
-        // Add product form handler
+        // Add product
         async function handleProductSubmit(e) {
             e.preventDefault();
             
@@ -1968,7 +2149,6 @@
             try {
                 let imageUrl = '';
                 
-                // Only upload image if one was selected
                 if (currentImageFile) {
                     imageUrl = await uploadToCloudinary(currentImageFile);
                 }
@@ -1985,10 +2165,10 @@
                     discountedPrice: discountedPrice,
                     stock: parseInt(document.getElementById('stock').value),
                     category: document.getElementById('category').value,
+                    description: document.getElementById('description').value,
                     createdAt: new Date()
                 };
 
-                // Only add image URL if we have one
                 if (imageUrl) {
                     productData.image = imageUrl;
                 }
@@ -1996,21 +2176,12 @@
                 await addDoc(collection(db, 'products'), productData);
                 showToast('Product added successfully!', 'success');
                 document.getElementById('productForm').reset();
-                document.getElementById('imagePreview').innerHTML = `
-                    <label for="image" class="upload-label">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span>Click to upload product image</span>
-                        <small class="upload-info">Supports JPG, PNG (Max 5MB)</small>
-                    </label>
-                `;
-                currentImageFile = null;
+                removeImage();
                 
-                // Reload products if on that tab
                 if (document.getElementById('view-products').classList.contains('active')) {
                     loadProducts();
                 }
                 
-                // Update dashboard stats
                 loadDashboardStats();
             } catch (error) {
                 showToast('Error adding product: ' + error.message, 'error');
@@ -2020,15 +2191,13 @@
             }
         }
 
-        // Load dashboard statistics
+        // Load dashboard stats
         async function loadDashboardStats() {
             try {
-                // Get total products
                 const productsQuery = await getDocs(collection(db, 'products'));
                 const totalProducts = productsQuery.size;
                 document.getElementById('totalProducts').textContent = totalProducts;
                 
-                // Get low stock items (stock < 5)
                 let lowStockCount = 0;
                 productsQuery.forEach(doc => {
                     if (doc.data().stock < 5) {
@@ -2037,12 +2206,10 @@
                 });
                 document.getElementById('lowStock').textContent = lowStockCount;
                 
-                // Get total orders
                 const ordersQuery = await getDocs(collection(db, 'orders'));
                 const totalOrders = ordersQuery.size;
                 document.getElementById('totalOrders').textContent = totalOrders;
                 
-                // Get pending orders
                 const pendingQuery = query(collection(db, 'orders'), where('status', '==', 'Pending'));
                 const pendingSnapshot = await getDocs(pendingQuery);
                 document.getElementById('pendingOrders').textContent = pendingSnapshot.size;
@@ -2058,7 +2225,6 @@
             container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading recent activity...</div>';
             
             try {
-                // Get recent orders
                 const recentOrdersQuery = query(
                     collection(db, 'orders'),
                     orderBy('orderDate', 'desc'),
@@ -2071,21 +2237,7 @@
                     recentOrders.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // Get recent products
-                const recentProductsQuery = query(
-                    collection(db, 'products'),
-                    orderBy('createdAt', 'desc'),
-                    limit(5)
-                );
-                
-                const productsSnapshot = await getDocs(recentProductsQuery);
-                const recentProducts = [];
-                productsSnapshot.forEach(doc => {
-                    recentProducts.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Display activity
-                if (recentOrders.length === 0 && recentProducts.length === 0) {
+                if (recentOrders.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-info-circle"></i>
@@ -2096,107 +2248,61 @@
                     return;
                 }
                 
-                let activityHTML = `
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div>
-                            <h3 style="margin-bottom: 15px; color: var(--text-dark);">
-                                <i class="fas fa-clipboard-list"></i> Recent Orders
-                            </h3>
-                `;
+                let activityHTML = '<div class="orders-grid">';
                 
-                if (recentOrders.length > 0) {
-                    activityHTML += `
-                        <div style="background: white; border-radius: var(--radius-md); padding: 15px; box-shadow: var(--shadow-sm);">
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color);">
-                                        <th style="padding: 10px; text-align: left; font-size: 14px;">Order ID</th>
-                                        <th style="padding: 10px; text-align: left; font-size: 14px;">Customer</th>
-                                        <th style="padding: 10px; text-align: left; font-size: 14px;">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    recentOrders.forEach(order => {
-                        activityHTML += `
-                            <tr style="border-bottom: 1px solid var(--border-color);">
-                                <td style="padding: 10px; font-size: 13px;">${order.id.substring(0, 6)}...</td>
-                                <td style="padding: 10px; font-size: 13px;">${order.customerName || 'N/A'}</td>
-                                <td style="padding: 10px; font-size: 13px;">${formatUGX(order.totalPrice || 0)}</td>
-                            </tr>
-                        `;
-                    });
+                recentOrders.forEach(order => {
+                    const orderDate = order.orderDate ? new Date(order.orderDate.seconds * 1000) : new Date();
+                    const statusClass = `status-${(order.status || 'pending').toLowerCase()}`;
                     
                     activityHTML += `
-                                </tbody>
-                            </table>
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div>
+                                    <div class="order-id">Order #${order.id.substring(0, 8)}</div>
+                                    <div class="order-date">${orderDate.toLocaleDateString()}</div>
+                                </div>
+                                <span class="status-badge ${statusClass}">
+                                    ${order.status || 'Pending'}
+                                </span>
+                            </div>
+                            <div class="order-customer">
+                                <div class="customer-name">${order.customerName || 'N/A'}</div>
+                                <div class="customer-contact">${order.contactInfo || 'N/A'}</div>
+                            </div>
+                            
+                            ${order.products && order.products.length > 0 ? `
+                                <div class="order-products">
+                                    ${order.products.slice(0, 3).map(product => `
+                                        <div class="product-item">
+                                            <img src="${product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}" 
+                                                 alt="${product.name}" 
+                                                 class="product-image-small"
+                                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
+                                            <div class="product-details">
+                                                <div class="product-name">${product.name}</div>
+                                                <div class="product-info">
+                                                    <span class="product-quantity">Qty: ${product.quantity || 1}</span>
+                                                    <span>${formatUGX(product.price || 0)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                    ${order.products.length > 3 ? `
+                                        <div style="text-align: center; padding: 10px; color: var(--text-light); font-size: 14px;">
+                                            +${order.products.length - 3} more items
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                            
+                            <div class="order-footer">
+                                <div class="order-total">${formatUGX(order.totalPrice || 0)}</div>
+                            </div>
                         </div>
                     `;
-                } else {
-                    activityHTML += `
-                        <div style="background: white; border-radius: var(--radius-md); padding: 20px; text-align: center; color: var(--text-light);">
-                            <i class="fas fa-info-circle"></i>
-                            <p>No recent orders</p>
-                        </div>
-                    `;
-                }
+                });
                 
-                activityHTML += `
-                        </div>
-                        <div>
-                            <h3 style="margin-bottom: 15px; color: var(--text-dark);">
-                                <i class="fas fa-box-open"></i> Recent Products
-                            </h3>
-                `;
-                
-                if (recentProducts.length > 0) {
-                    activityHTML += `
-                        <div style="background: white; border-radius: var(--radius-md); padding: 15px; box-shadow: var(--shadow-sm);">
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color);">
-                                        <th style="padding: 10px; text-align: left; font-size: 14px;">Product</th>
-                                        <th style="padding: 10px; text-align: left; font-size: 14px;">Price</th>
-                                        <th style="padding: 10px; text-align: left; font-size: 14px;">Stock</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    recentProducts.forEach(product => {
-                        const displayPrice = product.discountedPrice ? 
-                            `<span style="text-decoration: line-through; color: var(--text-light); margin-right: 5px;">${formatUGX(product.originalPrice)}</span> ${formatUGX(product.discountedPrice)}` :
-                            `${formatUGX(product.originalPrice)}`;
-                        
-                        activityHTML += `
-                            <tr style="border-bottom: 1px solid var(--border-color);">
-                                <td style="padding: 10px; font-size: 13px;">${product.name}</td>
-                                <td style="padding: 10px; font-size: 13px;">${displayPrice}</td>
-                                <td style="padding: 10px; font-size: 13px;">${product.stock}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    activityHTML += `
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                } else {
-                    activityHTML += `
-                        <div style="background: white; border-radius: var(--radius-md); padding: 20px; text-align: center; color: var(--text-light);">
-                            <i class="fas fa-info-circle"></i>
-                            <p>No recent products</p>
-                        </div>
-                    `;
-                }
-                
-                activityHTML += `
-                        </div>
-                    </div>
-                `;
-                
+                activityHTML += '</div>';
                 container.innerHTML = activityHTML;
                 
             } catch (error) {
@@ -2236,7 +2342,7 @@
         }
 
         // Search products
-        async function searchProducts() {
+        function searchProducts() {
             const searchTerm = document.getElementById('productSearch').value.toLowerCase();
             const container = document.getElementById('productsContainer');
             
@@ -2247,9 +2353,9 @@
             
             const filteredProducts = products.filter(product => 
                 product.name.toLowerCase().includes(searchTerm) ||
-                product.category.toLowerCase().includes(searchTerm) ||
-                product.color.toLowerCase().includes(searchTerm) ||
-                product.size.toLowerCase().includes(searchTerm)
+                (product.category && product.category.toLowerCase().includes(searchTerm)) ||
+                (product.color && product.color.toLowerCase().includes(searchTerm)) ||
+                (product.size && product.size.toLowerCase().includes(searchTerm))
             );
             
             if (filteredProducts.length === 0) {
@@ -2281,7 +2387,6 @@
                 return;
             }
 
-            // Paginate products
             const startIndex = (currentPage - 1) * itemsPerPage;
             const paginatedProducts = productsToDisplay.slice(startIndex, startIndex + itemsPerPage);
             
@@ -2302,17 +2407,21 @@
                             <div class="product-card">
                                 ${product.stock < 5 ? `<span class="product-badge">Low Stock</span>` : ''}
                                 ${hasDiscount ? `<span class="product-badge" style="background: var(--danger-gradient); top: 50px;">Sale</span>` : ''}
-                                <img src="${product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='}" alt="${product.name}" class="product-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+                                <img src="${product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='}" 
+                                     alt="${product.name}" 
+                                     class="product-image" 
+                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPgo='">
                                 <h3 class="product-title">${product.name}</h3>
                                 ${displayPrice}
                                 <div class="product-meta">
                                     <span><strong>Stock:</strong> ${product.stock}</span>
-                                    <span><strong>Color:</strong> ${product.color}</span>
+                                    <span><strong>Color:</strong> ${product.color || 'N/A'}</span>
                                 </div>
                                 <div class="product-meta">
-                                    <span><strong>Size:</strong> ${product.size}</span>
-                                    <span><strong>Category:</strong> ${product.category}</span>
+                                    <span><strong>Size:</strong> ${product.size || 'N/A'}</span>
+                                    <span><strong>Category:</strong> ${product.category || 'N/A'}</span>
                                 </div>
+                                ${product.description ? `<p style="margin-top: 10px; font-size: 14px; color: var(--text-light);">${product.description.substring(0, 100)}...</p>` : ''}
                                 <div class="product-actions">
                                     <button class="btn btn-warning btn-sm" onclick="editProduct('${product.id}')">
                                         <i class="fas fa-edit"></i> Edit
@@ -2328,50 +2437,14 @@
             `;
         }
 
-        // Edit product
+        // Edit product (simplified - you can expand this)
         window.editProduct = async function(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
             
-            document.getElementById('editProductId').value = product.id;
-            document.getElementById('editName').value = product.name;
-            document.getElementById('editOriginalPrice').value = product.originalPrice;
-            document.getElementById('editDiscountedPrice').value = product.discountedPrice || '';
-            document.getElementById('editStock').value = product.stock;
-            document.getElementById('editColor').value = product.color;
-            document.getElementById('editSize').value = product.size;
-            document.getElementById('editCategory').value = product.category;
-            
-            openModal('editProductModal');
+            // For now, just show the product details
+            showToast(`Editing: ${product.name}`, 'info');
         };
-
-        // Save product changes
-        async function saveProductChanges() {
-            const productId = document.getElementById('editProductId').value;
-            const originalPrice = parseFloat(document.getElementById('editOriginalPrice').value);
-            const discountedPrice = document.getElementById('editDiscountedPrice').value ? 
-                parseFloat(document.getElementById('editDiscountedPrice').value) : null;
-
-            const productData = {
-                name: document.getElementById('editName').value,
-                originalPrice: originalPrice,
-                discountedPrice: discountedPrice,
-                stock: parseInt(document.getElementById('editStock').value),
-                color: document.getElementById('editColor').value,
-                size: document.getElementById('editSize').value,
-                category: document.getElementById('editCategory').value
-            };
-            
-            try {
-                await updateDoc(doc(db, 'products', productId), productData);
-                showToast('Product updated successfully!', 'success');
-                closeModal('editProductModal');
-                loadProducts(currentPage);
-                loadDashboardStats();
-            } catch (error) {
-                showToast('Error updating product: ' + error.message, 'error');
-            }
-        }
 
         // Delete product
         window.deleteProduct = async function(productId) {
@@ -2425,7 +2498,7 @@
             }
         }
 
-        // Filter orders by status
+        // Filter orders
         window.filterOrders = function() {
             const status = document.getElementById('orderFilter').value;
             loadOrders(1, status);
@@ -2447,74 +2520,72 @@
                 return;
             }
 
-            // Paginate orders
             const startIndex = (currentPage - 1) * itemsPerPage;
             const paginatedOrders = ordersToDisplay.slice(startIndex, startIndex + itemsPerPage);
             
-            container.innerHTML = `
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Products</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${paginatedOrders.map(order => `
-                            <tr>
-                                <td>${order.id.substring(0, 8)}...</td>
-                                <td>
-                                    <div class="customer-info">
-                                        <span class="customer-name">${order.customerName || 'N/A'}</span>
-                                        <span class="customer-contact">${order.contactInfo || 'N/A'}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    ${order.products ? order.products.slice(0, 2).map(p => `${p.name} (${p.quantity})`).join('<br>') : 'N/A'}
-                                    ${order.products && order.products.length > 2 ? `<br><small>+${order.products.length - 2} more</small>` : ''}
-                                </td>
-                                <td>${formatUGX(order.totalPrice || 0)}</td>
-                                <td>
-                                    <span class="status-badge status-${(order.status || 'pending').toLowerCase()}">
-                                        <i class="fas ${getStatusIcon(order.status)}"></i>
-                                        ${order.status || 'Pending'}
-                                    </span>
-                                </td>
-                                <td>${order.orderDate ? new Date(order.orderDate.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
-                                <td>
-                                    <div class="dropdown">
-                                        <select class="dropdown-select" onchange="updateOrderStatus('${order.id}', this.value)">
-                                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                            <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                                            <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                            <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                                        </select>
-                                        <div class="dropdown-arrow">
-                                            <i class="fas fa-chevron-down"></i>
+            let ordersHTML = '<div class="orders-grid">';
+            
+            paginatedOrders.forEach(order => {
+                const orderDate = order.orderDate ? new Date(order.orderDate.seconds * 1000) : new Date();
+                const statusClass = `status-${(order.status || 'pending').toLowerCase()}`;
+                ordersHTML += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-id">Order #${order.id.substring(0, 8)}</div>
+                                <div class="order-date">${orderDate.toLocaleDateString()}</div>
+                            </div>
+                            <span class="status-badge ${statusClass}">
+                                ${order.status || 'Pending'}
+                            </span>
+                        </div>
+                        
+                        <div class="order-customer">
+                            <div class="customer-name">${order.customerName || 'N/A'}</div>
+                            <div class="customer-contact">${order.contactInfo || 'N/A'}</div>
+                        </div>
+                        
+                        ${order.products && order.products.length > 0 ? `
+                            <div class="order-products">
+                                ${order.products.slice(0, 3).map(product => `
+                                    <div class="product-item">
+                                        <img src="${product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}" 
+                                             alt="${product.name}" 
+                                             class="product-image-small"
+                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
+                                        <div class="product-details">
+                                            <div class="product-name">${product.name}</div>
+                                            <div class="product-info">
+                                                <span class="product-quantity">Qty: ${product.quantity || 1}</span>
+                                                <span>${formatUGX(product.price || 0)}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-        }
-
-        // Get status icon
-        function getStatusIcon(status) {
-            switch(status?.toLowerCase()) {
-                case 'pending': return 'fa-clock';
-                case 'processing': return 'fa-sync-alt';
-                case 'delivered': return 'fa-check-circle';
-                case 'cancelled': return 'fa-times-circle';
-                default: return 'fa-clock';
-            }
+                                `).join('')}
+                                ${order.products.length > 3 ? `
+                                    <div style="text-align: center; padding: 10px; color: var(--text-light); font-size: 14px;">
+                                        +${order.products.length - 3} more items
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="order-footer">
+                            <div class="order-total">${formatUGX(order.totalPrice || 0)}</div>
+                            <div class="order-actions">
+                                <select class="dropdown-select" onchange="updateOrderStatus('${order.id}', this.value)" style="width: auto;">
+                                    <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                    <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = ordersHTML;
         }
 
         // Update order status
@@ -2543,14 +2614,12 @@
             
             let paginationHTML = '';
             
-            // Previous button
             if (currentPage > 1) {
                 paginationHTML += `<button onclick="load${elementId === 'productsPagination' ? 'Products' : 'Orders'}(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
             } else {
                 paginationHTML += `<button disabled><i class="fas fa-chevron-left"></i></button>`;
             }
             
-            // Page numbers
             for (let i = 1; i <= totalPages; i++) {
                 if (i === currentPage) {
                     paginationHTML += `<button class="active">${i}</button>`;
@@ -2565,7 +2634,6 @@
                 }
             }
             
-            // Next button
             if (currentPage < totalPages) {
                 paginationHTML += `<button onclick="load${elementId === 'productsPagination' ? 'Products' : 'Orders'}(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
             } else {
@@ -2575,7 +2643,7 @@
             paginationContainer.innerHTML = paginationHTML;
         }
 
-        // Show toast notification
+        // Show toast
         function showToast(message, type) {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
@@ -2591,22 +2659,8 @@
             }, 3000);
         }
 
-        // Open modal
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-
-        // Close modal
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target.className === 'modal') {
-                event.target.style.display = 'none';
-            }
-        }
+        // Initialize
+        checkAuthState();
     </script>
 </body>
 </html>
