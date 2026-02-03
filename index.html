@@ -1605,6 +1605,10 @@
                             <select id="category" required>
                                 <option value="">Select Category</option>
                                 <option value="Clothing">Clothing</option>
+                                <option value="Back to School">Back to School</option>
+                                <option value="Clothes">Clothes</option>
+                                <option value="Bags">Bags</option>
+                                <option value="Belts">Belts</option>
                                 <option value="Shoes">Shoes</option>
                                 <option value="Accessories">Accessories</option>
                                 <option value="Electronics">Electronics</option>
@@ -1622,8 +1626,8 @@
                                     <span>Click to upload product image</span>
                                     <small class="upload-info">Supports JPG, PNG</small>
                                 </label>
-                                <input type="file" id="image" accept="image/*" style="display: none;">
                             </div>
+                            <input type="file" id="image" accept="image/*" style="display: none;">
                             <div class="upload-options">
                                 <button type="button" class="upload-btn" onclick="openCamera()">
                                     <i class="fas fa-camera"></i> Take Photo
@@ -2267,7 +2271,8 @@ async function installPWA() {
                             </div>
                             <div class="order-customer">
                                 <div class="customer-name">${order.customerName || 'N/A'}</div>
-                                <div class="customer-contact">${order.contactInfo || 'N/A'}</div>
+                                <div class="customer-contact"><i class="fas fa-phone"></i> ${order.phone || 'N/A'}</div>
+                                <div class="customer-contact"><i class="fas fa-envelope"></i> ${order.email || 'N/A'}</div>
                             </div>
                             
                             ${order.products && order.products.length > 0 ? `
@@ -2284,6 +2289,11 @@ async function installPWA() {
                                                     <span class="product-quantity">Qty: ${product.quantity || 1}</span>
                                                     <span>${formatUGX(product.price || 0)}</span>
                                                 </div>
+                                            ${product.size || product.color ? `
+                                            <div class="product-info" style="font-size: 12px; color: var(--text-light);">
+                                                ${product.size ? `<span>Size: ${product.size}</span>` : ''}
+                                                ${product.color ? `<span style="margin-left: 8px;">Color: ${product.color}</span>` : ''}
+                                            </div>` : ''}
                                             </div>
                                         </div>
                                     `).join('')}
@@ -2437,13 +2447,74 @@ async function installPWA() {
             `;
         }
 
-        // Edit product (simplified - you can expand this)
-        window.editProduct = async function(productId) {
+        // Open modal
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        // Close modal
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Edit product
+        window.editProduct = function(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
             
-            // For now, just show the product details
-            showToast(`Editing: ${product.name}`, 'info');
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('editName').value = product.name || '';
+            document.getElementById('editOriginalPrice').value = product.originalPrice || '';
+            document.getElementById('editDiscountedPrice').value = product.discountedPrice || '';
+            document.getElementById('editStock').value = product.stock || 0;
+            document.getElementById('editColor').value = product.color || '';
+            document.getElementById('editSize').value = product.size || '';
+            document.getElementById('editCategory').value = product.category || 'Clothing';
+            document.getElementById('editDescription').value = product.description || '';
+            
+            openModal('editProductModal');
+        };
+
+        // Save product changes
+        window.saveProductChanges = async function() {
+            const productId = document.getElementById('editProductId').value;
+            const submitBtn = document.querySelector('#editProductModal .btn-primary');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                const productData = {
+                    name: document.getElementById('editName').value,
+                    originalPrice: parseFloat(document.getElementById('editOriginalPrice').value),
+                    discountedPrice: document.getElementById('editDiscountedPrice').value ? parseFloat(document.getElementById('editDiscountedPrice').value) : null,
+                    stock: parseInt(document.getElementById('editStock').value),
+                    color: document.getElementById('editColor').value,
+                    size: document.getElementById('editSize').value,
+                    category: document.getElementById('editCategory').value,
+                    description: document.getElementById('editDescription').value
+                };
+
+                await updateDoc(doc(db, 'products', productId), productData);
+                
+                showToast('Product updated successfully!', 'success');
+                closeModal('editProductModal');
+                loadProducts(currentPage);
+                loadDashboardStats();
+            } catch (error) {
+                showToast('Error updating product: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
         };
 
         // Delete product
@@ -2542,7 +2613,11 @@ async function installPWA() {
                         
                         <div class="order-customer">
                             <div class="customer-name">${order.customerName || 'N/A'}</div>
-                            <div class="customer-contact">${order.contactInfo || 'N/A'}</div>
+                            <div class="customer-contact"><i class="fas fa-phone"></i> ${order.phone || 'N/A'}</div>
+                            <div class="customer-contact"><i class="fas fa-envelope"></i> ${order.email || 'N/A'}</div>
+                            <div class="customer-contact" style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--border-color);">
+                                <i class="fas fa-map-marker-alt"></i> ${order.deliveryAddress || 'N/A'}
+                            </div>
                         </div>
                         
                         ${order.products && order.products.length > 0 ? `
@@ -2559,6 +2634,11 @@ async function installPWA() {
                                                 <span class="product-quantity">Qty: ${product.quantity || 1}</span>
                                                 <span>${formatUGX(product.price || 0)}</span>
                                             </div>
+                                            ${product.size || product.color ? `
+                                            <div class="product-info" style="font-size: 12px; color: var(--text-light);">
+                                                ${product.size ? `<span>Size: ${product.size}</span>` : ''}
+                                                ${product.color ? `<span style="margin-left: 8px;">Color: ${product.color}</span>` : ''}
+                                            </div>` : ''}
                                         </div>
                                     </div>
                                 `).join('')}
