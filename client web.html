@@ -3324,26 +3324,55 @@ function closeZoom() {
 
 // Send WhatsApp notification via backend webhook
 async function sendWhatsAppNotification(orderData) {
-    const webhookUrl = 'http://localhost:3000/send-whatsapp'; // IMPORTANT: Replace with your production webhook URL
+    // Twilio Configuration
+    const accountSid = 'AC10091923685d248d39154165106691d4';
+    const authToken = '0a740df7c6d2bad1001a9e9b514bb3d9'.trim();
+    const fromNumber = 'whatsapp:+14155238886';
+    const toNumber = 'whatsapp:+256782864711';
+
+    // Construct the message body with order details
+    const itemsList = orderData.products.map(p => `${p.quantity}x ${p.name}`).join('\n');
+    const messageBody = `*New Order Received!* 📦\n\n` +
+        `*Order ID:* ${orderData.orderId}\n` +
+        `*Customer:* ${orderData.customerName}\n` +
+        `*Phone:* ${orderData.phone}\n` +
+        `*Total:* UGX ${new Intl.NumberFormat('en-UG').format(orderData.totalPrice)}\n` +
+        `*Payment:* ${orderData.paymentMethod}\n\n` +
+        `*Items:*\n${itemsList}`;
+
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+    const formData = new URLSearchParams();
+    formData.append('To', toNumber);
+    formData.append('From', fromNumber);
+    formData.append('Body', messageBody);
 
     try {
-        const response = await fetch(webhookUrl, {
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + btoa(accountSid + ':' + authToken),
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify(orderData),
+            body: formData
         });
 
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            console.log('✅ WhatsApp notification sent successfully via webhook:', result.messageSid);
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ WhatsApp notification sent successfully:', result.sid);
+            showToast('WhatsApp notification sent!', 'success');
         } else {
-            console.error('❌ Failed to send WhatsApp notification via webhook:', result.error, result.details);
+            const error = await response.json();
+            console.error('❌ Failed to send WhatsApp notification:', JSON.stringify(error));
+            showToast('Twilio Error: ' + (error.message || error.code || 'Unauthorized'), 'error');
         }
     } catch (error) {
-        console.error('❌ Error calling WhatsApp webhook:', error);
+        console.error('❌ Error sending WhatsApp notification:', error);
+        if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+            showToast('WhatsApp Error: Browser blocked request (CORS)', 'error');
+            console.warn('⚠️ CORS Error: Browsers block direct Twilio API calls. You may need a backend or a browser extension to test this.');
+        } else {
+            showToast('Error sending WhatsApp: ' + error.message, 'error');
+        }
     }
 }
 
@@ -3552,4 +3581,5 @@ function showError(selector, message) {
         window.removeFromCart = removeFromCart;
     </script>
 </body>
+</html>
 </html>
