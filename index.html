@@ -10,7 +10,6 @@
     <link rel="icon" href="icons/icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/currency.js"></script>
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #1a5f23 0%, #2E8B57 100%);
@@ -1076,6 +1075,7 @@
             justify-content: center;
             margin-top: 30px;
             gap: 5px;
+            flex-wrap: wrap;
         }
 
         .pagination button {
@@ -1085,6 +1085,11 @@
             border-radius: var(--radius-sm);
             cursor: pointer;
             transition: var(--transition);
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .pagination button:hover:not(:disabled) {
@@ -1095,6 +1100,11 @@
             background: var(--primary-gradient);
             color: white;
             border-color: var(--primary-color);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* Dropdowns */
@@ -1113,6 +1123,7 @@
             width: 100%;
             appearance: none;
             padding-right: 35px;
+            color: var(--text-dark);
         }
 
         .dropdown-select:focus {
@@ -1201,6 +1212,8 @@
             border-radius: var(--radius-lg);
             width: 100%;
             max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
             padding: 20px;
             box-shadow: var(--shadow-xl);
             animation: modalFadeIn 0.3s ease;
@@ -1260,6 +1273,23 @@
         @keyframes slideInUp {
             from { transform: translateY(100px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 4px;
+            transition: width 0.3s ease;
         }
 
         /* Mobile Responsive */
@@ -1621,8 +1651,8 @@
                         <label><i class="fas fa-image"></i> Product Image</label>
                         <div class="image-upload">
                             <div class="image-preview" id="imagePreview">
-                                <label for="image" class="upload-label">
-                                    <i class="fas fa-cloud-upload-alt"></i>
+                                <label for="image" class="upload-label" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; cursor: pointer; color: var(--text-light);">
+                                    <i class="fas fa-cloud-upload-alt" style="font-size: 48px; margin-bottom: 10px;"></i>
                                     <span>Click to upload product image</span>
                                     <small class="upload-info">Supports JPG, PNG</small>
                                 </label>
@@ -1636,11 +1666,11 @@
                                     <i class="fas fa-folder-open"></i> Choose from Device
                                 </button>
                             </div>
-                            <div class="upload-progress" id="uploadProgress" style="display: none;">
+                            <div id="uploadProgress" style="display: none; margin-top: 15px;">
                                 <div class="progress-bar">
-                                    <div class="progress-fill" id="progressBar"></div>
+                                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
                                 </div>
-                                <div class="progress-text" id="progressText">Uploading...</div>
+                                <div class="progress-text" id="progressText" style="text-align: center; margin-top: 5px; font-size: 14px; color: var(--text-light);">Uploading...</div>
                             </div>
                         </div>
                     </div>
@@ -1660,7 +1690,7 @@
                     <h2><i class="fas fa-boxes"></i> Product Inventory</h2>
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="productSearch" placeholder="Search products...">
+                        <input type="text" id="productSearch" placeholder="Search products..." oninput="searchProducts()">
                     </div>
                 </div>
                 <div id="productsContainer">
@@ -1681,10 +1711,10 @@
                     <div class="dropdown">
                         <select class="dropdown-select" id="orderFilter" onchange="filterOrders()">
                             <option value="all">All Orders</option>
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
                         </select>
                         <div class="dropdown-arrow">
                             <i class="fas fa-chevron-down"></i>
@@ -1711,7 +1741,7 @@
                     <button class="modal-close" onclick="closeModal('editProductModal')">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="editProductForm" onsubmit="event.preventDefault(); saveProductChanges();">
+                    <form id="editProductForm">
                         <input type="hidden" id="editProductId">
                         <div class="form-group">
                             <label for="editName">Product Name</label>
@@ -1719,17 +1749,17 @@
                         </div>
                         <div class="form-grid" style="margin-bottom: 15px;">
                             <div class="form-group">
-                                <label for="editOriginalPrice">Price (UGX)</label>
+                                <label for="editOriginalPrice">Original Price (UGX)</label>
                                 <input type="number" id="editOriginalPrice" step="0.01" required>
                             </div>
                             <div class="form-group">
-                                <label for="editDiscountedPrice">Discount Price</label>
+                                <label for="editDiscountedPrice">Discounted Price (UGX)</label>
                                 <input type="number" id="editDiscountedPrice" step="0.01">
                             </div>
                         </div>
                         <div class="form-grid" style="margin-bottom: 15px;">
                             <div class="form-group">
-                                <label for="editStock">Stock</label>
+                                <label for="editStock">Stock Quantity</label>
                                 <input type="number" id="editStock" required>
                             </div>
                             <div class="form-group">
@@ -1792,153 +1822,128 @@
 
     <!-- JavaScript -->
     <script type="module">
-// ---------------- Firebase Setup ----------------
+        // ---------------- Firebase Setup ----------------
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import {
+            getFirestore,
+            addDoc,
+            getDocs,
+            doc,
+            updateDoc,
+            deleteDoc,
+            collection,
+            query,
+            where,
+            orderBy,
+            limit
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Firebase core
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4MHkpXUrnnQiaB4ru9q5CvJoQMwJRv1g",
+            authDomain: "aj-shop-e10b7.firebaseapp.com",
+            projectId: "aj-shop-e10b7",
+            storageBucket: "aj-shop-e10b7.firebasestorage.app",
+            messagingSenderId: "259849089139",
+            appId: "1:259849089139:web:7cee95b18d5e0c90103a06",
+            measurementId: "G-4YZQPLNR3F"
+        };
 
-// Firebase Auth
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-// Firestore
-import {
-  getFirestore,
-  addDoc,
-  getDocs,
-  doc,
-  updateDoc,
-  deleteDoc,
-  collection,
-  query,
-  where,
-  orderBy,
-  limit
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // ---------------- Cloudinary ----------------
+        const CLOUDINARY_CLOUD_NAME = "dxgrgkz7c";
+        const CLOUDINARY_UPLOAD_PRESET = "unsigned_uploads";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyC4MHkpXUrnnQiaB4ru9q5CvJoQMwJRv1g",
-    authDomain: "aj-shop-e10b7.firebaseapp.com",
-    projectId: "aj-shop-e10b7",
-    storageBucket: "aj-shop-e10b7.firebasestorage.app",
-    messagingSenderId: "259849089139",
-    appId: "1:259849089139:web:7cee95b18d5e0c90103a06",
-    measurementId: "G-4YZQPLNR3F"
-};
+        // ---------------- Global State ----------------
+        let products = [];
+        let orders = [];
+        let currentProducts = [];
+        let currentOrders = [];
+        let currentImageFile = null;
+        let currentProductPage = 1;
+        let currentOrderPage = 1;
+        const itemsPerPage = 8;
+        let deferredPrompt = null;
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// ---------------- Cloudinary ----------------
-
-const CLOUDINARY_CLOUD_NAME = "dxgrgkz7c";
-const CLOUDINARY_UPLOAD_PRESET = "unsigned_uploads";
-
-// ---------------- Global State ----------------
-
-let products = [];
-let orders = [];
-let currentImageFile = null;
-let currentPage = 1;
-const itemsPerPage = 10;
-let deferredPrompt = null;
-
-// ---------------- App Init ----------------
-
-document.addEventListener("DOMContentLoaded", () => {
-  setupEventListeners();
-  checkAuthState();
-  registerServiceWorker();
-  setupPWAInstall();
-});
-
-// ---------------- Service Worker ----------------
-
-async function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) return;
-
-  try {
-    const registration = await navigator.serviceWorker.register("./sw.js");
-    console.log("✅ Service Worker registered:", registration.scope);
-  } catch (err) {
-    console.error("❌ Service Worker registration failed:", err);
-  }
-}
-
-// ---------------- PWA Install ----------------
-
-function setupPWAInstall() {
-  const dismissed = localStorage.getItem("installPromptDismissed");
-  if (dismissed === "true") return;
-
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    setTimeout(() => {
-      showInstallPrompt();
-    }, 4000);
-  });
-
-  window.addEventListener("appinstalled", () => {
-    deferredPrompt = null;
-    hideInstallPrompt();
-    showToast("App installed successfully 🎉", "success");
-  });
-}
-
-function showInstallPrompt() {
-  const promptEl = document.getElementById("installPrompt");
-  if (promptEl) {
-    promptEl.style.display = "block";
-  }
-}
-
-function hideInstallPrompt() {
-  const promptEl = document.getElementById("installPrompt");
-  if (promptEl) {
-    promptEl.style.display = "none";
-  }
-}
-
-window.dismissInstallPrompt = function() {
-  localStorage.setItem("installPromptDismissed", "true");
-  hideInstallPrompt();
-};
-
-window.installPWA = async function() {
-  if (!deferredPrompt) return;
-
-  deferredPrompt.prompt();
-  const choice = await deferredPrompt.userChoice;
-
-  if (choice.outcome === "accepted") {
-    console.log("✅ User accepted PWA install");
-  } else {
-    console.log("❌ User dismissed PWA install");
-  }
-
-  deferredPrompt = null;
-  hideInstallPrompt();
-};
-
-
-        // Launch screen timeout
-        setTimeout(() => {
-            const launchScreen = document.getElementById('launchScreen');
-            launchScreen.style.animation = 'fadeOut 0.5s ease forwards';
+        // ---------------- App Initialization ----------------
+        document.addEventListener("DOMContentLoaded", () => {
+            setupEventListeners();
+            checkAuthState();
+            setupPWAInstall();
+            
+            // Launch screen timeout
             setTimeout(() => {
-                launchScreen.style.display = 'none';
-            }, 500);
-        }, 2000);
+                const launchScreen = document.getElementById('launchScreen');
+                launchScreen.style.animation = 'fadeOut 0.5s ease forwards';
+                setTimeout(() => {
+                    launchScreen.style.display = 'none';
+                }, 500);
+            }, 2000);
+        });
 
+        // ---------------- PWA Install ----------------
+        function setupPWAInstall() {
+            const dismissed = localStorage.getItem("installPromptDismissed");
+            if (dismissed === "true") return;
+
+            window.addEventListener("beforeinstallprompt", (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+
+                setTimeout(() => {
+                    showInstallPrompt();
+                }, 4000);
+            });
+
+            window.addEventListener("appinstalled", () => {
+                deferredPrompt = null;
+                hideInstallPrompt();
+                showToast("App installed successfully 🎉", "success");
+            });
+        }
+
+        function showInstallPrompt() {
+            const promptEl = document.getElementById("installPrompt");
+            if (promptEl) promptEl.style.display = "block";
+        }
+
+        function hideInstallPrompt() {
+            const promptEl = document.getElementById("installPrompt");
+            if (promptEl) promptEl.style.display = "none";
+        }
+
+        window.dismissInstallPrompt = function() {
+            localStorage.setItem("installPromptDismissed", "true");
+            hideInstallPrompt();
+        };
+
+        window.installPWA = async function() {
+            if (!deferredPrompt) return;
+
+            deferredPrompt.prompt();
+            const choice = await deferredPrompt.userChoice;
+
+            if (choice.outcome === "accepted") {
+                console.log("✅ User accepted PWA install");
+            } else {
+                console.log("❌ User dismissed PWA install");
+            }
+
+            deferredPrompt = null;
+            hideInstallPrompt();
+        };
+
+        // ---------------- Auth Functions ----------------
         function checkAuthState() {
             onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -1949,38 +1954,36 @@ window.installPWA = async function() {
             });
         }
 
-        // Show login page
         function showLoginPage() {
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('registerPage').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'none';
         }
 
-        // Show register page
         function showRegisterPage() {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('registerPage').style.display = 'flex';
             document.getElementById('adminPanel').style.display = 'none';
         }
 
-        // Show admin panel
         function showAdminPanel(user) {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('registerPage').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'block';
             
             // Update user info
-            document.getElementById('userName').textContent = user.displayName || user.email;
-            document.getElementById('userAvatar').textContent = (user.displayName || user.email).charAt(0).toUpperCase();
-            document.getElementById('mobileUserName').textContent = user.displayName || user.email;
-            document.getElementById('mobileUserAvatar').textContent = (user.displayName || user.email).charAt(0).toUpperCase();
+            const displayName = user.displayName || user.email;
+            document.getElementById('userName').textContent = displayName;
+            document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+            document.getElementById('mobileUserName').textContent = displayName;
+            document.getElementById('mobileUserAvatar').textContent = displayName.charAt(0).toUpperCase();
             
             // Load initial data
             loadDashboardStats();
             loadRecentActivity();
         }
 
-        // Set up event listeners
+        // ---------------- Event Listeners ----------------
         function setupEventListeners() {
             // Login form
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -2003,142 +2006,11 @@ window.installPWA = async function() {
             // Product form
             document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
             
-            // Product search
-            document.getElementById('productSearch').addEventListener('input', searchProducts);
+            // Edit product form
+            document.getElementById('editProductForm').addEventListener('submit', saveProductChanges);
         }
 
-        // Toggle mobile sidebar
-        window.toggleMobileSidebar = function() {
-            const sidebar = document.getElementById('mobileSidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            
-            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-        };
-
-        // Open camera
-        window.openCamera = function() {
-            document.getElementById('cameraInput').click();
-        };
-
-        // Handle camera image
-        function handleCameraImage(e) {
-            const file = e.target.files[0];
-            if (file) {
-                handleImageFile(file);
-            }
-        }
-
-        // Handle image upload
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                handleImageFile(file);
-            }
-        }
-
-        // Handle image file
-        function handleImageFile(file) {
-            // Show processing state
-            const preview = document.getElementById('imagePreview');
-            preview.innerHTML = `
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-light);">
-                    <div class="loading-spinner"></div>
-                    <p style="margin-top: 10px;">Enhancing & Compressing...</p>
-                </div>
-            `;
-            
-            // Disable submit button during processing to prevent upload of unprocessed image
-            const submitBtn = document.querySelector('#productForm button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Image...';
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-
-                    // Max dimensions for compression (1200px)
-                    const MAX_WIDTH = 1200;
-                    const MAX_HEIGHT = 1200;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    // Image Enhancement (Brightness, Contrast, Saturation)
-                    ctx.filter = 'brightness(1.05) contrast(1.1) saturate(1.1)';
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Compress to JPEG with 0.8 quality
-                    canvas.toBlob((blob) => {
-                        if (blob) {
-                            const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-                                type: 'image/jpeg',
-                                lastModified: Date.now()
-                            });
-                            
-                            currentImageFile = processedFile;
-                            
-                            // Re-enable submit button
-                            if (submitBtn) {
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML = '<i class="fas fa-save"></i> Add Product';
-                            }
-                            
-                            // Display preview
-                            const previewUrl = URL.createObjectURL(processedFile);
-                            preview.innerHTML = `
-                                <img src="${previewUrl}" alt="Preview" style="width: 100%; height: 100%; object-fit: contain;">
-                                <button class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px;" onclick="removeImage()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(26, 95, 35, 0.8); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                                    <i class="fas fa-magic"></i> Enhanced
-                                </div>
-                            `;
-                        }
-                    }, 'image/jpeg', 0.8);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Remove image
-        window.removeImage = function() {
-            document.getElementById('image').value = '';
-            document.getElementById('cameraInput').value = '';
-            document.getElementById('imagePreview').innerHTML = `
-                <label for="image" class="upload-label">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <span>Click to upload product image</span>
-                    <small class="upload-info">Supports JPG, PNG</small>
-                </label>
-            `;
-            currentImageFile = null;
-        };
-
-        // Handle login
+        // ---------------- Auth Handlers ----------------
         async function handleLogin(e) {
             e.preventDefault();
             
@@ -2155,7 +2027,6 @@ window.installPWA = async function() {
             }
         }
 
-        // Handle registration
         async function handleRegister(e) {
             e.preventDefault();
             
@@ -2189,7 +2060,6 @@ window.installPWA = async function() {
             }
         }
 
-        // Logout
         window.logout = async function() {
             try {
                 await signOut(auth);
@@ -2198,22 +2068,37 @@ window.installPWA = async function() {
             }
         };
 
-        // Tab switching
+        // ---------------- UI Functions ----------------
+        window.toggleMobileSidebar = function() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        };
+
         window.showTab = function(tabName) {
             if (window.innerWidth <= 1024) {
                 toggleMobileSidebar();
             }
             
+            // Update tabs
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.mobile-nav-tab').forEach(tab => tab.classList.remove('active'));
             
             document.getElementById(tabName).classList.add('active');
             
-            if (event) {
-                event.target.classList.add('active');
-            }
+            // Find and activate the clicked tab
+            const desktopTab = document.querySelector(`.nav-tab[onclick*="${tabName}"]`);
+            const mobileTab = document.querySelector(`.mobile-nav-tab[onclick*="${tabName}"]`);
             
+            if (desktopTab) desktopTab.classList.add('active');
+            if (mobileTab) mobileTab.classList.add('active');
+            
+            // Load data for the tab
             switch(tabName) {
                 case 'dashboard':
                     loadDashboardStats();
@@ -2228,58 +2113,156 @@ window.installPWA = async function() {
             }
         };
 
-        // Upload to Cloudinary
-        async function uploadToCloudinary(file) {
-            return new Promise((resolve, reject) => {
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-                formData.append("folder", "mutanda_traders");
+        window.openCamera = function() {
+            document.getElementById('cameraInput').click();
+        };
 
-                document.getElementById('uploadProgress').style.display = 'block';
+        function handleCameraImage(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleImageFile(file);
+            }
+        }
 
-                const xhr = new XMLHttpRequest();
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleImageFile(file);
+            }
+        }
+
+        // ---------------- Image Processing ----------------
+        function handleImageFile(file) {
+            // Show processing state
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-light);">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 10px;">Processing image...</p>
+                </div>
+            `;
+            
+            // Disable submit button during processing
+            const submitBtn = document.querySelector('#productForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            }
+
+            // Use createObjectURL for better performance
+            const imgUrl = URL.createObjectURL(file);
+            const img = new Image();
+            
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Set dimensions for compression
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 1200;
+                let width = img.width;
+                let height = img.height;
+
+                // Calculate new dimensions while maintaining aspect ratio
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width = Math.round((width * MAX_HEIGHT) / height);
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                // Draw image with enhancements
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Apply slight enhancements
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const data = imageData.data;
                 
-                xhr.upload.addEventListener("progress", function(e) {
-                    if (e.lengthComputable) {
-                        const percentComplete = (e.loaded / e.total) * 100;
-                        document.getElementById('progressBar').style.width = percentComplete + '%';
-                        document.getElementById('progressText').textContent = `Uploading... ${Math.round(percentComplete)}%`;
+                // Simple brightness and contrast adjustment
+                for (let i = 0; i < data.length; i += 4) {
+                    // Brightness
+                    data[i] = Math.min(255, data[i] * 1.1);
+                    data[i + 1] = Math.min(255, data[i + 1] * 1.1);
+                    data[i + 2] = Math.min(255, data[i + 2] * 1.1);
+                    
+                    // Contrast
+                    const factor = 1.2;
+                    data[i] = Math.min(255, Math.max(0, (data[i] - 128) * factor + 128));
+                    data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * factor + 128));
+                    data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * factor + 128));
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+
+                // Compress to JPEG
+                canvas.toBlob((blob) => {
+                    URL.revokeObjectURL(imgUrl);
+
+                    if (blob) {
+                        const processedFile = new File([blob], `product_${Date.now()}.jpg`, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        });
+                        
+                        currentImageFile = processedFile;
+                        
+                        // Re-enable submit button
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="fas fa-save"></i> Add Product';
+                        }
+                        
+                        // Display preview
+                        const previewUrl = URL.createObjectURL(processedFile);
+                        preview.innerHTML = `
+                            <img src="${previewUrl}" alt="Preview" style="width: 100%; height: 100%; object-fit: contain;">
+                            <button class="btn btn-danger btn-sm" style="position: absolute; top: 10px; right: 10px; z-index: 10;" onclick="removeImage()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(26, 95, 35, 0.8); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                <i class="fas fa-check"></i> Ready
+                            </div>
+                        `;
                     }
-                });
-
-                xhr.addEventListener("load", function() {
-                    if (xhr.status === 200) {
-                        const response = JSON.parse(xhr.responseText);
-                        document.getElementById('uploadProgress').style.display = 'none';
-                        resolve(response.secure_url);
-                    } else {
-                        document.getElementById('uploadProgress').style.display = 'none';
-                        reject(new Error('Upload failed'));
-                    }
-                });
-
-                xhr.addEventListener("error", function() {
-                    document.getElementById('uploadProgress').style.display = 'none';
-                    reject(new Error('Upload failed'));
-                });
-
-                xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
-                xhr.send(formData);
-            });
+                }, 'image/jpeg', 0.8); // 0.8 quality for good compression
+            };
+            
+            img.onerror = function() {
+                URL.revokeObjectURL(imgUrl);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Add Product';
+                }
+                showToast('Error processing image. Please try a different photo.', 'error');
+            };
+            
+            img.src = imgUrl;
         }
 
-        // Format UGX currency
-        function formatUGX(amount) {
-            return new Intl.NumberFormat('en-UG', {
-                style: 'currency',
-                currency: 'UGX',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(amount);
-        }
+        window.removeImage = function() {
+            document.getElementById('image').value = '';
+            document.getElementById('cameraInput').value = '';
+            document.getElementById('imagePreview').innerHTML = `
+                <label for="image" class="upload-label" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; cursor: pointer; color: var(--text-light);">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 48px; margin-bottom: 10px;"></i>
+                    <span>Click to upload product image</span>
+                    <small class="upload-info">Supports JPG, PNG</small>
+                </label>
+            `;
+            currentImageFile = null;
+        };
 
-        // Add product
+        // ---------------- Product Functions ----------------
         async function handleProductSubmit(e) {
             e.preventDefault();
             
@@ -2299,15 +2282,16 @@ window.installPWA = async function() {
                     parseFloat(document.getElementById('discountedPrice').value) : null;
 
                 const productData = {
-                    name: document.getElementById('name').value,
-                    color: document.getElementById('color').value,
-                    size: document.getElementById('size').value,
+                    name: document.getElementById('name').value.trim(),
+                    color: document.getElementById('color').value.trim(),
+                    size: document.getElementById('size').value.trim(),
                     originalPrice: originalPrice,
                     discountedPrice: discountedPrice,
                     stock: parseInt(document.getElementById('stock').value),
                     category: document.getElementById('category').value,
-                    description: document.getElementById('description').value,
-                    createdAt: new Date()
+                    description: document.getElementById('description').value.trim(),
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 };
 
                 if (imageUrl) {
@@ -2319,6 +2303,7 @@ window.installPWA = async function() {
                 document.getElementById('productForm').reset();
                 removeImage();
                 
+                // Refresh data
                 if (document.getElementById('view-products').classList.contains('active')) {
                     loadProducts();
                 }
@@ -2332,21 +2317,80 @@ window.installPWA = async function() {
             }
         }
 
-        // Load dashboard stats
+        async function uploadToCloudinary(file) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+                formData.append("folder", "mutanda_traders");
+                formData.append("timestamp", Date.now());
+
+                document.getElementById('uploadProgress').style.display = 'block';
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('progressText').textContent = 'Uploading... 0%';
+
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener("progress", function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        document.getElementById('progressBar').style.width = percentComplete + '%';
+                        document.getElementById('progressText').textContent = `Uploading... ${Math.round(percentComplete)}%`;
+                    }
+                });
+
+                xhr.addEventListener("load", function() {
+                    document.getElementById('uploadProgress').style.display = 'none';
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.secure_url) {
+                                resolve(response.secure_url);
+                            } else {
+                                reject(new Error('No URL returned from Cloudinary'));
+                            }
+                        } catch (parseError) {
+                            reject(new Error('Failed to parse Cloudinary response'));
+                        }
+                    } else {
+                        reject(new Error(`Upload failed with status ${xhr.status}`));
+                    }
+                });
+
+                xhr.addEventListener("error", function() {
+                    document.getElementById('uploadProgress').style.display = 'none';
+                    reject(new Error('Network error during upload'));
+                });
+
+                xhr.addEventListener("abort", function() {
+                    document.getElementById('uploadProgress').style.display = 'none';
+                    reject(new Error('Upload cancelled'));
+                });
+
+                xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
+                xhr.send(formData);
+            });
+        }
+
+        // ---------------- Dashboard Functions ----------------
         async function loadDashboardStats() {
             try {
+                // Load products
                 const productsQuery = await getDocs(collection(db, 'products'));
                 const totalProducts = productsQuery.size;
                 document.getElementById('totalProducts').textContent = totalProducts;
                 
                 let lowStockCount = 0;
                 productsQuery.forEach(doc => {
-                    if (doc.data().stock < 5) {
+                    const product = doc.data();
+                    if (product.stock < 5) {
                         lowStockCount++;
                     }
                 });
                 document.getElementById('lowStock').textContent = lowStockCount;
                 
+                // Load orders
                 const ordersQuery = await getDocs(collection(db, 'orders'));
                 const totalOrders = ordersQuery.size;
                 document.getElementById('totalOrders').textContent = totalOrders;
@@ -2357,19 +2401,18 @@ window.installPWA = async function() {
                 
             } catch (error) {
                 console.error('Error loading dashboard stats:', error);
+                showToast('Error loading dashboard stats', 'error');
             }
         }
 
-        // Load recent activity
         async function loadRecentActivity() {
             const container = document.getElementById('recentActivity');
-            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading recent activity...</div>';
             
             try {
                 const recentOrdersQuery = query(
                     collection(db, 'orders'),
                     orderBy('orderDate', 'desc'),
-                    limit(5)
+                    limit(4)
                 );
                 
                 const ordersSnapshot = await getDocs(recentOrdersQuery);
@@ -2400,7 +2443,7 @@ window.installPWA = async function() {
                             <div class="order-header">
                                 <div>
                                     <div class="order-id">Order #${order.id.substring(0, 8)}</div>
-                                    <div class="order-date">${orderDate.toLocaleDateString()}</div>
+                                    <div class="order-date">${formatDate(orderDate)}</div>
                                 </div>
                                 <span class="status-badge ${statusClass}">
                                     ${order.status || 'Pending'}
@@ -2409,39 +2452,7 @@ window.installPWA = async function() {
                             <div class="order-customer">
                                 <div class="customer-name">${order.customerName || 'N/A'}</div>
                                 <div class="customer-contact"><i class="fas fa-phone"></i> ${order.phone || 'N/A'}</div>
-                                <div class="customer-contact"><i class="fas fa-envelope"></i> ${order.email || 'N/A'}</div>
                             </div>
-                            
-                            ${order.products && order.products.length > 0 ? `
-                                <div class="order-products">
-                                    ${order.products.slice(0, 3).map(product => `
-                                        <div class="product-item">
-                                            <img src="${product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}" 
-                                                 alt="${product.name}" 
-                                                 class="product-image-small"
-                                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
-                                            <div class="product-details">
-                                                <div class="product-name">${product.name}</div>
-                                                <div class="product-info">
-                                                    <span class="product-quantity">Qty: ${product.quantity || 1}</span>
-                                                    <span>${formatUGX(product.price || 0)}</span>
-                                                </div>
-                                            ${product.size || product.color ? `
-                                            <div class="product-info" style="font-size: 12px; color: var(--text-light);">
-                                                ${product.size ? `<span>Size: ${product.size}</span>` : ''}
-                                                ${product.color ? `<span style="margin-left: 8px;">Color: ${product.color}</span>` : ''}
-                                            </div>` : ''}
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                    ${order.products.length > 3 ? `
-                                        <div style="text-align: center; padding: 10px; color: var(--text-light); font-size: 14px;">
-                                            +${order.products.length - 3} more items
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            ` : ''}
-                            
                             <div class="order-footer">
                                 <div class="order-total">${formatUGX(order.totalPrice || 0)}</div>
                             </div>
@@ -2456,18 +2467,18 @@ window.installPWA = async function() {
                 container.innerHTML = `
                     <div class="error">
                         <i class="fas fa-exclamation-circle"></i>
-                        Error loading recent activity: ${error.message}
+                        Error loading recent activity
                     </div>
                 `;
             }
         }
 
-        // Load products
+        // ---------------- Product Management ----------------
         async function loadProducts(page = 1) {
             const container = document.getElementById('productsContainer');
             container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading products...</div>';
             
-            currentPage = page;
+            currentProductPage = page;
 
             try {
                 const querySnapshot = await getDocs(collection(db, 'products'));
@@ -2475,9 +2486,16 @@ window.installPWA = async function() {
                 querySnapshot.forEach((doc) => {
                     products.push({ id: doc.id, ...doc.data() });
                 });
-
+                
+                // Sort by creation date (newest first)
+                products.sort((a, b) => {
+                    const dateA = a.createdAt?.seconds || 0;
+                    const dateB = b.createdAt?.seconds || 0;
+                    return dateB - dateA;
+                });
+                
+                currentProducts = [...products];
                 displayProducts();
-                setupPagination('productsPagination', products.length, page);
             } catch (error) {
                 container.innerHTML = `
                     <div class="error">
@@ -2488,54 +2506,46 @@ window.installPWA = async function() {
             }
         }
 
-        // Search products
         function searchProducts() {
-            const searchTerm = document.getElementById('productSearch').value.toLowerCase();
-            const container = document.getElementById('productsContainer');
+            const searchTerm = document.getElementById('productSearch').value.toLowerCase().trim();
             
             if (!searchTerm) {
+                currentProducts = [...products];
+                currentProductPage = 1;
                 displayProducts();
                 return;
             }
             
-            const filteredProducts = products.filter(product => 
-                product.name.toLowerCase().includes(searchTerm) ||
+            currentProducts = products.filter(product => 
+                (product.name && product.name.toLowerCase().includes(searchTerm)) ||
                 (product.category && product.category.toLowerCase().includes(searchTerm)) ||
                 (product.color && product.color.toLowerCase().includes(searchTerm)) ||
-                (product.size && product.size.toLowerCase().includes(searchTerm))
+                (product.size && product.size.toLowerCase().includes(searchTerm)) ||
+                (product.description && product.description.toLowerCase().includes(searchTerm))
             );
             
-            if (filteredProducts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-search"></i>
-                        <h3>No products found</h3>
-                        <p>No products match your search criteria</p>
-                    </div>
-                `;
-            } else {
-                displayProducts(filteredProducts);
-            }
+            currentProductPage = 1;
+            displayProducts();
         }
 
-        // Display products
-        function displayProducts(productsToDisplay = products) {
+        function displayProducts() {
             const container = document.getElementById('productsContainer');
             
-            if (productsToDisplay.length === 0) {
+            if (currentProducts.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-box-open"></i>
                         <h3>No products found</h3>
-                        <p>Add your first product to get started</p>
+                        <p>${document.getElementById('productSearch').value ? 'Try a different search term' : 'Add your first product to get started'}</p>
                     </div>
                 `;
                 document.getElementById('productsPagination').innerHTML = '';
                 return;
             }
 
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const paginatedProducts = productsToDisplay.slice(startIndex, startIndex + itemsPerPage);
+            const startIndex = (currentProductPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedProducts = currentProducts.slice(startIndex, endIndex);
             
             container.innerHTML = `
                 <div class="products-grid">
@@ -2550,15 +2560,18 @@ window.installPWA = async function() {
                                 <span class="discounted-price">${formatUGX(product.originalPrice || 0)}</span>
                             </div>`;
                         
+                        const stockStatus = product.stock < 5 ? `<span class="product-badge">Low Stock</span>` : '';
+                        const discountBadge = hasDiscount ? `<span class="product-badge" style="background: var(--danger-gradient); top: ${product.stock < 5 ? '50px' : '15px'};">Sale</span>` : '';
+                        
                         return `
                             <div class="product-card">
-                                ${product.stock < 5 ? `<span class="product-badge">Low Stock</span>` : ''}
-                                ${hasDiscount ? `<span class="product-badge" style="background: var(--danger-gradient); top: 50px;">Sale</span>` : ''}
-                                <img src="${product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='}" 
+                                ${stockStatus}
+                                ${discountBadge}
+                                <img loading="lazy" src="${product.image || getDefaultImage()}" 
                                      alt="${product.name}" 
-                                     class="product-image" 
-                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPgo='">
-                                <h3 class="product-title">${product.name}</h3>
+                                     class="product-image"
+                                     onerror="this.src='${getDefaultImage()}'">
+                                <h3 class="product-title" title="${product.name}">${product.name}</h3>
                                 ${displayPrice}
                                 <div class="product-meta">
                                     <span><strong>Stock:</strong> ${product.stock}</span>
@@ -2568,7 +2581,7 @@ window.installPWA = async function() {
                                     <span><strong>Size:</strong> ${product.size || 'N/A'}</span>
                                     <span><strong>Category:</strong> ${product.category || 'N/A'}</span>
                                 </div>
-                                ${product.description ? `<p style="margin-top: 10px; font-size: 14px; color: var(--text-light);">${product.description.substring(0, 100)}...</p>` : ''}
+                                ${product.description ? `<p style="margin-top: 10px; font-size: 14px; color: var(--text-light); line-height: 1.4; max-height: 60px; overflow: hidden;">${product.description}</p>` : ''}
                                 <div class="product-actions">
                                     <button class="btn btn-warning btn-sm" onclick="editProduct('${product.id}')">
                                         <i class="fas fa-edit"></i> Edit
@@ -2582,30 +2595,137 @@ window.installPWA = async function() {
                     }).join('')}
                 </div>
             `;
+            
+            setupPagination('productsPagination', currentProducts.length, currentProductPage, 'products');
         }
 
-        // Open modal
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
+        // ---------------- Order Management ----------------
+        async function loadOrders(page = 1, status = 'all') {
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading orders...</div>';
+            
+            currentOrderPage = page;
 
-        // Close modal
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
+            try {
+                let ordersQuery;
+                
+                if (status === 'all') {
+                    ordersQuery = query(collection(db, 'orders'), orderBy('orderDate', 'desc'));
+                } else {
+                    ordersQuery = query(
+                        collection(db, 'orders'),
+                        where('status', '==', status),
+                        orderBy('orderDate', 'desc')
+                    );
+                }
+                
+                const querySnapshot = await getDocs(ordersQuery);
+                orders = [];
+                querySnapshot.forEach((doc) => {
+                    orders.push({ id: doc.id, ...doc.data() });
+                });
+                currentOrders = [...orders];
+                
+                displayOrders();
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Error loading orders: ${error.message}
+                    </div>
+                `;
             }
         }
 
-        // Edit product
+        window.filterOrders = function() {
+            const status = document.getElementById('orderFilter').value;
+            currentOrderPage = 1;
+            loadOrders(1, status);
+        };
+
+        function displayOrders() {
+            const container = document.getElementById('ordersContainer');
+            
+            if (currentOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No orders found</h3>
+                        <p>There are no orders to display</p>
+                    </div>
+                `;
+                document.getElementById('ordersPagination').innerHTML = '';
+                return;
+            }
+
+            const startIndex = (currentOrderPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedOrders = currentOrders.slice(startIndex, endIndex);
+            
+            let ordersHTML = '<div class="orders-grid">';
+            
+            paginatedOrders.forEach(order => {
+                const orderDate = order.orderDate ? new Date(order.orderDate.seconds * 1000) : new Date();
+                const statusClass = `status-${(order.status || 'pending').toLowerCase()}`;
+                
+                ordersHTML += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-id">Order #${order.id.substring(0, 8)}</div>
+                                <div class="order-date">${formatDate(orderDate)}</div>
+                            </div>
+                            <span class="status-badge ${statusClass}">
+                                ${order.status || 'Pending'}
+                            </span>
+                        </div>
+                        
+                        <div class="order-customer">
+                            <div class="customer-name">${order.customerName || 'N/A'}</div>
+                            <div class="customer-contact"><i class="fas fa-phone"></i> ${order.phone || 'N/A'}</div>
+                            ${order.email ? `<div class="customer-contact"><i class="fas fa-envelope"></i> ${order.email}</div>` : ''}
+                        </div>
+                        
+                        <div class="order-footer">
+                            <div class="order-total">${formatUGX(order.totalPrice || 0)}</div>
+                            <div class="order-actions">
+                                <select class="dropdown-select" onchange="updateOrderStatus('${order.id}', this.value)" style="width: auto; padding: 8px 12px;">
+                                    <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                    <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = ordersHTML;
+            setupPagination('ordersPagination', currentOrders.length, currentOrderPage, 'orders');
+        }
+
+        window.updateOrderStatus = async function(orderId, newStatus) {
+            try {
+                await updateDoc(doc(db, 'orders', orderId), {
+                    status: newStatus,
+                    updatedAt: new Date()
+                });
+                showToast('Order status updated successfully!', 'success');
+                loadOrders(currentOrderPage, document.getElementById('orderFilter').value);
+                loadDashboardStats();
+            } catch (error) {
+                showToast('Error updating order status: ' + error.message, 'error');
+            }
+        };
+
+        // ---------------- Product CRUD ----------------
         window.editProduct = function(productId) {
             const product = products.find(p => p.id === productId);
-            if (!product) return;
-            console.log('Opening edit modal for:', product.name);
+            if (!product) {
+                showToast('Product not found', 'error');
+                return;
+            }
             
             document.getElementById('editProductId').value = product.id;
             document.getElementById('editName').value = product.name || '';
@@ -2620,8 +2740,9 @@ window.installPWA = async function() {
             openModal('editProductModal');
         };
 
-        // Save product changes
-        window.saveProductChanges = async function() {
+        async function saveProductChanges(e) {
+            e.preventDefault();
+            
             const productId = document.getElementById('editProductId').value;
             const submitBtn = document.querySelector('#editProductModal .btn-primary');
             const originalBtnText = submitBtn.innerHTML;
@@ -2631,21 +2752,23 @@ window.installPWA = async function() {
 
             try {
                 const productData = {
-                    name: document.getElementById('editName').value,
+                    name: document.getElementById('editName').value.trim(),
                     originalPrice: parseFloat(document.getElementById('editOriginalPrice').value),
-                    discountedPrice: document.getElementById('editDiscountedPrice').value ? parseFloat(document.getElementById('editDiscountedPrice').value) : null,
+                    discountedPrice: document.getElementById('editDiscountedPrice').value ? 
+                        parseFloat(document.getElementById('editDiscountedPrice').value) : null,
                     stock: parseInt(document.getElementById('editStock').value),
-                    color: document.getElementById('editColor').value,
-                    size: document.getElementById('editSize').value,
+                    color: document.getElementById('editColor').value.trim(),
+                    size: document.getElementById('editSize').value.trim(),
                     category: document.getElementById('editCategory').value,
-                    description: document.getElementById('editDescription').value
+                    description: document.getElementById('editDescription').value.trim(),
+                    updatedAt: new Date()
                 };
 
                 await updateDoc(doc(db, 'products', productId), productData);
                 
                 showToast('Product updated successfully!', 'success');
                 closeModal('editProductModal');
-                loadProducts(currentPage);
+                loadProducts(currentProductPage);
                 loadDashboardStats();
             } catch (error) {
                 showToast('Error updating product: ' + error.message, 'error');
@@ -2653,175 +2776,25 @@ window.installPWA = async function() {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;
             }
-        };
-
-        // Delete product
-        window.deleteProduct = async function(productId) {
-            if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
-                try {
-                    await deleteDoc(doc(db, 'products', productId));
-                    showToast('Product deleted successfully!', 'success');
-                    loadProducts(currentPage);
-                    loadDashboardStats();
-                } catch (error) {
-                    showToast('Error deleting product: ' + error.message, 'error');
-                }
-            }
-        };
-
-        // Load orders
-        async function loadOrders(page = 1, status = 'all') {
-            const container = document.getElementById('ordersContainer');
-            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading orders...</div>';
-            
-            currentPage = page;
-
-            try {
-                let ordersQuery;
-                
-                if (status === 'all') {
-                    ordersQuery = query(collection(db, 'orders'), orderBy('orderDate', 'desc'));
-                } else {
-                    ordersQuery = query(
-                        collection(db, 'orders'),
-                        where('status', '==', status.charAt(0).toUpperCase() + status.slice(1)),
-                        orderBy('orderDate', 'desc')
-                    );
-                }
-                
-                const querySnapshot = await getDocs(ordersQuery);
-                orders = [];
-                querySnapshot.forEach((doc) => {
-                    orders.push({ id: doc.id, ...doc.data() });
-                });
-
-                displayOrders();
-                setupPagination('ordersPagination', orders.length, page);
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="error">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Error loading orders: ${error.message}
-                    </div>
-                `;
-            }
         }
 
-        // Filter orders
-        window.filterOrders = function() {
-            const status = document.getElementById('orderFilter').value;
-            loadOrders(1, status);
-        };
-
-        // Display orders
-        function displayOrders(ordersToDisplay = orders) {
-            const container = document.getElementById('ordersContainer');
-            
-            if (ordersToDisplay.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-clipboard-list"></i>
-                        <h3>No orders found</h3>
-                        <p>There are no orders to display</p>
-                    </div>
-                `;
-                document.getElementById('ordersPagination').innerHTML = '';
+        window.deleteProduct = async function(productId) {
+            if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
                 return;
             }
-
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const paginatedOrders = ordersToDisplay.slice(startIndex, startIndex + itemsPerPage);
             
-            let ordersHTML = '<div class="orders-grid">';
-            
-            paginatedOrders.forEach(order => {
-                const orderDate = order.orderDate ? new Date(order.orderDate.seconds * 1000) : new Date();
-                const statusClass = `status-${(order.status || 'pending').toLowerCase()}`;
-                ordersHTML += `
-                    <div class="order-card">
-                        <div class="order-header">
-                            <div>
-                                <div class="order-id">Order #${order.id.substring(0, 8)}</div>
-                                <div class="order-date">${orderDate.toLocaleDateString()}</div>
-                            </div>
-                            <span class="status-badge ${statusClass}">
-                                ${order.status || 'Pending'}
-                            </span>
-                        </div>
-                        
-                        <div class="order-customer">
-                            <div class="customer-name">${order.customerName || 'N/A'}</div>
-                            <div class="customer-contact"><i class="fas fa-phone"></i> ${order.phone || 'N/A'}</div>
-                            <div class="customer-contact"><i class="fas fa-envelope"></i> ${order.email || 'N/A'}</div>
-                            <div class="customer-contact" style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--border-color);">
-                                <i class="fas fa-map-marker-alt"></i> ${order.deliveryAddress || 'N/A'}
-                            </div>
-                        </div>
-                        
-                        ${order.products && order.products.length > 0 ? `
-                            <div class="order-products">
-                                ${order.products.slice(0, 3).map(product => `
-                                    <div class="product-item">
-                                        <img src="${product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}" 
-                                             alt="${product.name}" 
-                                             class="product-image-small"
-                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
-                                        <div class="product-details">
-                                            <div class="product-name">${product.name}</div>
-                                            <div class="product-info">
-                                                <span class="product-quantity">Qty: ${product.quantity || 1}</span>
-                                                <span>${formatUGX(product.price || 0)}</span>
-                                            </div>
-                                            ${product.size || product.color ? `
-                                            <div class="product-info" style="font-size: 12px; color: var(--text-light);">
-                                                ${product.size ? `<span>Size: ${product.size}</span>` : ''}
-                                                ${product.color ? `<span style="margin-left: 8px;">Color: ${product.color}</span>` : ''}
-                                            </div>` : ''}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                                ${order.products.length > 3 ? `
-                                    <div style="text-align: center; padding: 10px; color: var(--text-light); font-size: 14px;">
-                                        +${order.products.length - 3} more items
-                                    </div>
-                                ` : ''}
-                            </div>
-                        ` : ''}
-                        
-                        <div class="order-footer">
-                            <div class="order-total">${formatUGX(order.totalPrice || 0)}</div>
-                            <div class="order-actions">
-                                <select class="dropdown-select" onchange="updateOrderStatus('${order.id}', this.value)" style="width: auto;">
-                                    <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                    <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                                    <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                    <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = ordersHTML;
-        }
-
-        // Update order status
-        window.updateOrderStatus = async function(orderId, newStatus) {
             try {
-                await updateDoc(doc(db, 'orders', orderId), {
-                    status: newStatus
-                });
-                showToast('Order status updated successfully!', 'success');
-                loadOrders(currentPage, document.getElementById('orderFilter').value);
+                await deleteDoc(doc(db, 'products', productId));
+                showToast('Product deleted successfully!', 'success');
+                loadProducts(currentProductPage);
                 loadDashboardStats();
             } catch (error) {
-                showToast('Error updating order status: ' + error.message, 'error');
+                showToast('Error deleting product: ' + error.message, 'error');
             }
         };
 
-        // Setup pagination
-        function setupPagination(elementId, totalItems, currentPage) {
+        // ---------------- Pagination ----------------
+        function setupPagination(elementId, totalItems, currentPage, type) {
             const totalPages = Math.ceil(totalItems / itemsPerPage);
             const paginationContainer = document.getElementById(elementId);
             
@@ -2832,36 +2805,122 @@ window.installPWA = async function() {
             
             let paginationHTML = '';
             
+            // Previous button
             if (currentPage > 1) {
-                paginationHTML += `<button onclick="load${elementId === 'productsPagination' ? 'Products' : 'Orders'}(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+                paginationHTML += `<button onclick="changePage('${type}', ${currentPage - 1})" aria-label="Previous page">
+                    <i class="fas fa-chevron-left"></i>
+                </button>`;
             } else {
-                paginationHTML += `<button disabled><i class="fas fa-chevron-left"></i></button>`;
+                paginationHTML += `<button disabled aria-label="Previous page">
+                    <i class="fas fa-chevron-left"></i>
+                </button>`;
             }
             
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === currentPage) {
-                    paginationHTML += `<button class="active">${i}</button>`;
-                } else if (
-                    i === 1 || 
-                    i === totalPages || 
-                    (i >= currentPage - 2 && i <= currentPage + 2)
-                ) {
-                    paginationHTML += `<button onclick="load${elementId === 'productsPagination' ? 'Products' : 'Orders'}(${i})">${i}</button>`;
-                } else if (i === currentPage - 3 || i === currentPage + 3) {
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            if (startPage > 1) {
+                paginationHTML += `<button onclick="changePage('${type}', 1)">1</button>`;
+                if (startPage > 2) {
                     paginationHTML += `<button disabled>...</button>`;
                 }
             }
             
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<button class="active" aria-current="page">${i}</button>`;
+                } else {
+                    paginationHTML += `<button onclick="changePage('${type}', ${i})">${i}</button>`;
+                }
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<button disabled>...</button>`;
+                }
+                paginationHTML += `<button onclick="changePage('${type}', ${totalPages})">${totalPages}</button>`;
+            }
+            
+            // Next button
             if (currentPage < totalPages) {
-                paginationHTML += `<button onclick="load${elementId === 'productsPagination' ? 'Products' : 'Orders'}(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+                paginationHTML += `<button onclick="changePage('${type}', ${currentPage + 1})" aria-label="Next page">
+                    <i class="fas fa-chevron-right"></i>
+                </button>`;
             } else {
-                paginationHTML += `<button disabled><i class="fas fa-chevron-right"></i></button>`;
+                paginationHTML += `<button disabled aria-label="Next page">
+                    <i class="fas fa-chevron-right"></i>
+                </button>`;
             }
             
             paginationContainer.innerHTML = paginationHTML;
         }
 
-        // Show toast
+        window.changePage = function(type, page) {
+            if (type === 'products') {
+                currentProductPage = page;
+                displayProducts();
+                // Scroll to top of products grid
+                const productsGrid = document.getElementById('productsContainer');
+                if (productsGrid) {
+                    productsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else if (type === 'orders') {
+                currentOrderPage = page;
+                displayOrders();
+                // Scroll to top of orders grid
+                const ordersGrid = document.getElementById('ordersContainer');
+                if (ordersGrid) {
+                    ordersGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        };
+
+        // ---------------- Modal Functions ----------------
+        window.openModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = '';
+        };
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        };
+
+        // ---------------- Utility Functions ----------------
+        function formatUGX(amount) {
+            if (isNaN(amount)) return 'UGX 0';
+            return `UGX ${amount.toLocaleString('en-UG')}`;
+        }
+
+        function formatDate(date) {
+            if (!(date instanceof Date) || isNaN(date)) return 'Invalid date';
+            return date.toLocaleDateString('en-UG', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getDefaultImage() {
+            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+        }
+
         function showToast(message, type) {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
@@ -2876,9 +2935,6 @@ window.installPWA = async function() {
                 toast.remove();
             }, 3000);
         }
-
-        // Initialize
-        checkAuthState();
     </script>
 </body>
 </html>

@@ -2183,6 +2183,12 @@
                         <p>Loading products...</p>
                     </div>
                 </div>
+                <div id="loadMoreContainer" class="text-center" style="margin-top: 40px; display: none;">
+                    <button class="view-btn" onclick="loadMoreProducts()" style="margin: 0 auto; padding: 15px 40px; font-size: 1.1rem;">
+                        <i class="fas fa-sync-alt"></i>
+                        Load More Products
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -2518,6 +2524,8 @@ let currentProduct = null;
 let selectedSize = null;
 let selectedColor = null;
 let searchTimeout = null;
+let currentPage = 1;
+const itemsPerPage = 12;
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
@@ -2571,7 +2579,7 @@ async function loadProductsFromFirestore() {
         });
         
         filteredProducts = [...allProducts];
-        displayProducts();
+        displayProducts(true);
     } catch (error) {
         console.error('Error loading products:', error);
         showError('#productsGrid', `Error loading products: ${error.message}`);
@@ -2579,8 +2587,14 @@ async function loadProductsFromFirestore() {
 }
 
 // Display products in grid
-function displayProducts() {
+function displayProducts(reset = true) {
     const grid = document.getElementById('productsGrid');
+    const loadMoreContainer = document.getElementById('loadMoreContainer');
+    
+    if (reset) {
+        currentPage = 1;
+        grid.innerHTML = '';
+    }
     
     if (filteredProducts.length === 0) {
         grid.innerHTML = `
@@ -2590,10 +2604,15 @@ function displayProducts() {
                 <p>Try adjusting your search or check back soon for our latest collection!</p>
             </div>
         `;
+        if (loadMoreContainer) loadMoreContainer.style.display = 'none';
         return;
     }
 
-    grid.innerHTML = filteredProducts.map(product => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const productsToShow = filteredProducts.slice(start, end);
+
+    const html = productsToShow.map(product => {
         const price = product.originalPrice || 0;
         const discountedPrice = product.discountedPrice || price;
         const hasDiscount = discountedPrice < price;
@@ -2656,6 +2675,22 @@ function displayProducts() {
             </div>
         `;
     }).join('');
+
+    if (reset) {
+        grid.innerHTML = html;
+    } else {
+        grid.insertAdjacentHTML('beforeend', html);
+    }
+
+    if (loadMoreContainer) {
+        loadMoreContainer.style.display = end < filteredProducts.length ? 'block' : 'none';
+    }
+}
+
+// Load more products
+function loadMoreProducts() {
+    currentPage++;
+    displayProducts(false);
 }
 
 // Search products
@@ -2670,7 +2705,7 @@ function searchProducts(searchTerm) {
         if (!searchTerm.trim()) {
             filteredProducts = [...allProducts];
             searchResults.classList.remove('active');
-            displayProducts();
+            displayProducts(true);
             return;
         }
         
@@ -2716,28 +2751,34 @@ function searchProducts(searchTerm) {
         }
         
         // Update main grid
-        displayProducts();
+        displayProducts(true);
     }, 300);
 }
 
 // Search products on mobile
 function searchProductsMobile(searchTerm) {
-    if (!searchTerm.trim()) {
-        filteredProducts = [...allProducts];
-        displayProducts();
-        return;
+    if (searchTimeout) {
+        clearTimeout(searchTimeout);
     }
-    
-    const term = searchTerm.toLowerCase().trim();
-    filteredProducts = allProducts.filter(product => {
-        return (
-            product.name.toLowerCase().includes(term) ||
-            (product.category && product.category.toLowerCase().includes(term)) ||
-            (product.description && product.description.toLowerCase().includes(term))
-        );
-    });
-    
-    displayProducts();
+
+    searchTimeout = setTimeout(() => {
+        if (!searchTerm.trim()) {
+            filteredProducts = [...allProducts];
+            displayProducts(true);
+            return;
+        }
+        
+        const term = searchTerm.toLowerCase().trim();
+        filteredProducts = allProducts.filter(product => {
+            return (
+                product.name.toLowerCase().includes(term) ||
+                (product.category && product.category.toLowerCase().includes(term)) ||
+                (product.description && product.description.toLowerCase().includes(term))
+            );
+        });
+        
+        displayProducts(true);
+    }, 300);
 }
 
 // Show mobile search
@@ -3579,6 +3620,7 @@ function showError(selector, message) {
         window.searchProductsMobile = searchProductsMobile;
         window.updateQuantity = updateQuantity;
         window.removeFromCart = removeFromCart;
+        window.loadMoreProducts = loadMoreProducts;
     </script>
 </body>
 </html>
