@@ -2556,6 +2556,40 @@ function formatUGX(amount) {
     return new Intl.NumberFormat('en-UG').format(Math.round(amount));
 }
 
+// New: Helper function to transform Cloudinary URLs for optimization
+function transformCloudinaryUrl(url, transformations) {
+    if (!url || typeof url !== 'string' || !url.includes('res.cloudinary.com')) {
+        return url; // Not a Cloudinary URL, return as is
+    }
+    const parts = url.split('/upload/');
+    if (parts.length !== 2) {
+        return url; // Invalid Cloudinary URL structure
+    }
+    const transformString = Object.entries(transformations).map(([key, value]) => `${key}_${value}`).join(',');
+    return `${parts[0]}/upload/${transformString}/${parts[1]}`;
+}
+// Format UGX currency
+function formatUGX(amount) {
+    return new Intl.NumberFormat('en-UG').format(Math.round(amount));
+}
+
+// New: Helper function to transform Cloudinary URLs for optimization
+function transformCloudinaryUrl(url, transformations) {
+    if (!url || !url.includes('res.cloudinary.com')) {
+        return url; // Not a Cloudinary URL, return as is
+    }
+    const parts = url.split('/upload/');
+    if (parts.length !== 2) {
+        return url; // Invalid Cloudinary URL structure
+    }
+    const transformString = Object.entries(transformations).map(([key, value]) => `${key}_${value}`).join(',');
+    return `${parts[0]}/upload/${transformString}/${parts[1]}`;
+}
+// Format UGX currency
+function formatUGX(amount) {
+    return new Intl.NumberFormat('en-UG').format(Math.round(amount));
+}
+
 // Load products from Firestore
 async function loadProductsFromFirestore() {
     try {
@@ -2608,6 +2642,15 @@ function displayProducts(reset = true) {
         return;
     }
 
+    const gridImageTransformations = {
+        f: 'auto', // Auto format (e.g., WebP)
+        q: 'auto', // Auto quality
+        w: 400,    // Width 400px
+        h: 400,    // Height 400px
+        c: 'fill', // Crop mode
+        g: 'auto'  // Auto gravity for crop
+    };
+
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const productsToShow = filteredProducts.slice(start, end);
@@ -2617,7 +2660,7 @@ function displayProducts(reset = true) {
         const discountedPrice = product.discountedPrice || price;
         const hasDiscount = discountedPrice < price;
         const stockText = getStockText(product.stock);
-        const productImage = product.image || getPlaceholderImage(product.category);
+        const productImage = transformCloudinaryUrl(product.image, gridImageTransformations) || getPlaceholderImage(product.category);
         const specs = product.specifications || {};
         
         // Create specs badges
@@ -2639,6 +2682,7 @@ function displayProducts(reset = true) {
                     <img src="${productImage}" 
                          alt="${product.name}" 
                          class="product-image"
+                         loading="lazy"
                          onerror="this.src='${getPlaceholderImage(product.category)}'">
                     <div class="quick-view-overlay" onclick="event.stopPropagation(); viewProduct('${product.id}')">
                         <span class="quick-view-text">
@@ -2725,13 +2769,19 @@ function searchProducts(searchTerm) {
         
         // Update search results dropdown
         if (filteredProducts.length > 0) {
+            const thumbImageTransformations = { w: 100, h: 100, c: 'fill', f: 'auto', q: 'auto' };
+
             searchResults.innerHTML = filteredProducts.slice(0, 5).map(product => {
                 const price = product.discountedPrice || product.originalPrice || 0;
-                const image = product.image || getPlaceholderImage(product.category);
+                const image = transformCloudinaryUrl(product.image, thumbImageTransformations) || getPlaceholderImage(product.category);
                 
                 return `
                     <div class="search-item" onclick="viewProduct('${product.id}'); document.getElementById('searchResults').classList.remove('active');">
-                        <img src="${image}" alt="${product.name}" class="search-item-image" onerror="this.src='${getPlaceholderImage('General')}'">
+                        <img src="${image}" 
+                             alt="${product.name}" 
+                             class="search-item-image" 
+                             loading="lazy" 
+                             onerror="this.src='${getPlaceholderImage('General')}'">
                         <div class="search-item-info">
                             <div class="search-item-name">${product.name}</div>
                             <div class="search-item-price">UGX ${formatUGX(price)}</div>
@@ -2830,6 +2880,14 @@ function viewProduct(productId) {
     viewQuantity = 1;
     selectedSize = null;
     selectedColor = null;
+
+    const detailImageTransformations = {
+        w: 800,
+        h: 800,
+        c: 'limit', // Resize without cropping, fit within dimensions
+        f: 'auto',
+        q: 'auto'
+    };
     
     // Update product view page
     const price = product.originalPrice || 0;
@@ -2843,7 +2901,7 @@ function viewProduct(productId) {
     
     // Update image
     const productImage = document.getElementById('productViewImage');
-    productImage.src = product.image || getPlaceholderImage(product.category);
+    productImage.src = transformCloudinaryUrl(product.image, detailImageTransformations) || getPlaceholderImage(product.category);
     productImage.onerror = function() {
         this.src = getPlaceholderImage(product.category);
     };
@@ -3132,6 +3190,8 @@ function updateCartDisplay() {
         checkoutBtn.disabled = true;
     } else {
         cartItems.innerHTML = cart.map((item, index) => {
+            const thumbImageTransformations = { w: 150, h: 150, c: 'fill', f: 'auto', q: 'auto' };
+            const cartImage = transformCloudinaryUrl(item.image, thumbImageTransformations);
             let specsHtml = '';
             if (item.size) {
                 specsHtml += `<span class="cart-item-spec">Size: ${item.size}</span>`;
@@ -3142,7 +3202,7 @@ function updateCartDisplay() {
             
             return `
                 <div class="cart-item">
-                    <img src="${item.image}" alt="${item.name}" class="cart-item-image" onerror="this.src='${getPlaceholderImage('General')}'">
+                    <img src="${cartImage}" alt="${item.name}" class="cart-item-image" loading="lazy" onerror="this.src='${getPlaceholderImage('General')}'">
                     <div class="cart-item-info">
                         <div class="cart-item-name">${item.name}</div>
                         ${specsHtml ? `<div class="cart-item-specs">${specsHtml}</div>` : ''}
